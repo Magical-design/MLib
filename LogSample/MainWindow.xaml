@@ -1,12 +1,26 @@
-﻿<Window x:Class="LogSample.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogSample"
+        xmlns:Log="clr-namespace:MLib.Log;assembly=MLib" x:Class="LogSample.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="LogSample" Height="600" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="503*"/>
+            <RowDefinition Height="66*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <Log:Log x:Name="Log1" Grid.Row="0" Grid.Column="0" />
+        <Log:Log x:Name="Log2" Grid.Row="0" Grid.Column="1" />
+        <Button x:Name="btn1" Grid.Column="0"  Grid.Row="1"   Content="Button1" HorizontalAlignment="Center" Height="46" Margin="0" VerticalAlignment="Center" Width="173" Click="btn1_Click"/>
+        <Button x:Name="btn2" Grid.Column="1"  Grid.Row="1"   Content="Button2" HorizontalAlignment="Center" Height="46" Margin="0" VerticalAlignment="Center" Width="173" Click="btn2_Click"/>
+
     </Grid>
 </Window>

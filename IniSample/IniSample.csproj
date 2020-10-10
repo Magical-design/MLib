@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{57BA8417-31A9-49C6-8205-1A9C85AD9C78}</ProjectGuid>
+    <ProjectGuid>{6C938CBD-E52E-448A-80E8-C29EA97F6469}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>LogSample</RootNamespace>
-    <AssemblyName>LogSample</AssemblyName>
+    <RootNamespace>IniSample</RootNamespace>
+    <AssemblyName>IniSample</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,6 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Dictionary1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -96,7 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MLib\MLib.csproj">
-      <Project>{0b37dc5b-4916-4d83-874e-35fb1f26fb7c}</Project>
+      <Project>{0B37DC5B-4916-4D83-874E-35FB1F26FB7C}</Project>
       <Name>MLib</Name>
     </ProjectReference>
   </ItemGroup>

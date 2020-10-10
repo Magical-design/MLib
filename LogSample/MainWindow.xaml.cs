@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+
 namespace LogSample
 {
     /// <summary>
@@ -20,9 +21,26 @@ namespace LogSample
     /// </summary>
     public partial class MainWindow : Window
     {
+        int i=0, j=0;
         public MainWindow()
         {
             InitializeComponent();
+            Log1.hisLog.SavePath += @"控件1\";
+            Log2.hisLog.SavePath += @"控件2\";
+            Log1.Mylog("");
+            Log2.Mylog("");
+        }
+
+        private void btn1_Click(object sender, RoutedEventArgs e)
+        {
+            i++;
+            Log1.Mylog("今天天气好😁！"+i);
+        }
+
+        private void btn2_Click(object sender, RoutedEventArgs e)
+        {
+            j++;
+            Log2.Mylog("今天天气不好😥！"+j);
         }
     }
 }
