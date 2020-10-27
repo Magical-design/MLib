@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLib", "MLib\MLib.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IniSample", "IniSample\IniSample.csproj", "{6C938CBD-E52E-448A-80E8-C29EA97F6469}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NetSample", "NetSample", "{0CBA8DCC-E272-4EDC-81FF-B67A4A995DB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpClientSample", "TcpClientSample\TcpClientSample.csproj", "{2DAB9B1D-4107-4F88-A2E4-EFB4FF967589}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,9 +31,16 @@ Global
 		{6C938CBD-E52E-448A-80E8-C29EA97F6469}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C938CBD-E52E-448A-80E8-C29EA97F6469}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C938CBD-E52E-448A-80E8-C29EA97F6469}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DAB9B1D-4107-4F88-A2E4-EFB4FF967589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DAB9B1D-4107-4F88-A2E4-EFB4FF967589}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DAB9B1D-4107-4F88-A2E4-EFB4FF967589}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DAB9B1D-4107-4F88-A2E4-EFB4FF967589}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2DAB9B1D-4107-4F88-A2E4-EFB4FF967589} = {0CBA8DCC-E272-4EDC-81FF-B67A4A995DB6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F6BE6F93-2D83-4C30-8548-FB813A7D8BD3}

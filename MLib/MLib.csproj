@@ -53,6 +53,7 @@
       <DependentUpon>Log.xaml</DependentUpon>
     </Compile>
     <Compile Include="MyClass\MyClass.cs" />
+    <Compile Include="NET\ITcpClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -61,5 +62,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
