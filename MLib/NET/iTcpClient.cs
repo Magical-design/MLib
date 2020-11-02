@@ -18,6 +18,8 @@ namespace MLib.NET
         private bool connecting = false;
         private bool sendAndRecLock = false;
         private bool autoReceiving = false;
+
+        
         public bool Connect
         {
             get
@@ -66,7 +68,7 @@ namespace MLib.NET
         public object lck=new object();
         public void CheckCnt()
         {
-
+            
             try
             {
 

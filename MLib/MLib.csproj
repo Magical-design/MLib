@@ -54,6 +54,8 @@
     </Compile>
     <Compile Include="MyClass\MyClass.cs" />
     <Compile Include="NET\ITcpClient.cs" />
+    <Compile Include="NET\ITcpSever.cs" />
+    <Compile Include="NET\IUdpClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

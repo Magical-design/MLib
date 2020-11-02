@@ -66,7 +66,7 @@ namespace TcpClientSample
         {
             txIP.Text = "127.0.0.1";
             txPort.Text = "3000";
-            iTcpClient.AutoConnect = true;
+            //iTcpClient.AutoConnect = true;
             Connect = false;
             iTcpClient.ConnectStatusChange += RefreshConnect;
             iTcpClient.AutoReceiveContent +=Receive;
