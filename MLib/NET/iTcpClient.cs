@@ -181,7 +181,8 @@ namespace MLib.NET
                             stream.ReadTimeout = 10000;
                             // Read the first batch of the TcpServer response bytes.
                             Int32 bytes = stream.Read(recData, 0, recData.Length);
-                            responseData = System.Text.Encoding.ASCII.GetString(recData, 0, bytes);
+                            //responseData = System.Text.Encoding.ASCII.GetString(recData, 0, bytes);
+                            responseData = System.Text.Encoding.Default.GetString(recData, 0, bytes);
                             autoReceiving = false;
                             AutoReceiveContent?.Invoke(null, responseData);
                         }
