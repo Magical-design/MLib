@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MFile\Csv.cs" />
+    <Compile Include="MFile\Excel.cs" />
     <Compile Include="MFile\IXml.cs" />
     <Compile Include="MFile\MFile.cs" />
     <Compile Include="MFile\Ini.cs" />

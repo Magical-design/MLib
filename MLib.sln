@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvSample", "CsvSample\CsvS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlSample", "XmlSample\XmlSample.csproj", "{1AEAD308-C8DB-4C69-BE1A-C1AFDBE37E66}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelSample", "ExcelSample\ExcelSample.csproj", "{50BE049C-1E57-4D41-9A7C-1770FEDEEE35}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vision", "Vision", "{0E09B554-1701-4A3B-A2DA-F17B0F5BC5C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +65,10 @@ Global
 		{1AEAD308-C8DB-4C69-BE1A-C1AFDBE37E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AEAD308-C8DB-4C69-BE1A-C1AFDBE37E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AEAD308-C8DB-4C69-BE1A-C1AFDBE37E66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50BE049C-1E57-4D41-9A7C-1770FEDEEE35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50BE049C-1E57-4D41-9A7C-1770FEDEEE35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50BE049C-1E57-4D41-9A7C-1770FEDEEE35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50BE049C-1E57-4D41-9A7C-1770FEDEEE35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +79,7 @@ Global
 		{255D31C9-FADF-43BE-A38B-30184B55C537} = {0CBA8DCC-E272-4EDC-81FF-B67A4A995DB6}
 		{CA17695A-5681-47AD-B722-4125E7BF7EF8} = {6D80FD0F-4B55-4A77-AD15-0CCD99E94D42}
 		{1AEAD308-C8DB-4C69-BE1A-C1AFDBE37E66} = {6D80FD0F-4B55-4A77-AD15-0CCD99E94D42}
+		{50BE049C-1E57-4D41-9A7C-1770FEDEEE35} = {6D80FD0F-4B55-4A77-AD15-0CCD99E94D42}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F6BE6F93-2D83-4C30-8548-FB813A7D8BD3}

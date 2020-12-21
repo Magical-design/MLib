@@ -1,0 +1,26 @@
+﻿<Window x:Class="ExcelSample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExcelSample"
+        mc:Ignorable="d"
+        Title="ExcelSample" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400*"/>
+            <ColumnDefinition Width="400*"/>
+            <ColumnDefinition Width="300*"/>
+        </Grid.ColumnDefinitions>
+        <GroupBox Grid.Column="0" Header="Sheet1">
+            <DataGrid x:Name="dg1"  />
+        </GroupBox>
+        <GroupBox Grid.Column="1" Header="Sheet2">
+            <DataGrid x:Name="dg2"  />
+        </GroupBox>
+        <Button x:Name="btImport" Content="导入" Grid.Column="2" HorizontalAlignment="Left" Height="36" Margin="47,38,0,0" VerticalAlignment="Top" Width="120" FontSize="20" Click="btImport_Click"/>
+        <Button x:Name="btExport"  Content="导出" Grid.Column="2" HorizontalAlignment="Left" Height="33" Margin="47,89,0,0" VerticalAlignment="Top" Width="120" FontSize="20" Click="btExport_Click"/>
+        <Button x:Name="btInsertLine1"  Content="Sheet1插入" Grid.Column="2" HorizontalAlignment="Left" Height="41" Margin="47,140,0,0" VerticalAlignment="Top" Width="120" FontSize="20" Click="btInsertLine1_Click" />
+        <Button x:Name="btInsertLine2"  Content="Sheet2插入" Grid.Column="2" HorizontalAlignment="Left" Height="42" Margin="47,197,0,0" VerticalAlignment="Top" Width="120" FontSize="20" Click="btInsertLine2_Click" />
+    </Grid>
+</Window>
