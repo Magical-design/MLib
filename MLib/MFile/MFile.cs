@@ -61,7 +61,7 @@ namespace MLib
                       mPathR = true;
 
 
-                  if (File.Exists(mFliePath) || mFliePath=="")
+                  if (File.Exists(mFliePath) || mFileName == "")
                       mFileNameR= true;
                   else
                   {

@@ -1,0 +1,25 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ScanSample"
+        xmlns:HalconViewer="clr-namespace:HalconViewer;assembly=HalconViewer" x:Class="ScanSample.MainWindow"
+        mc:Ignorable="d"
+        Title="ScanSample" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <HalconViewer:ImageViewer x:Name="mImageViewer" Grid.Column="0" />
+        <Grid Grid.Column="1">
+            <Button x:Name="btRecognitionRegion" Content="识别区域" Margin="81,97,66,0" VerticalAlignment="Top" Click="btRecognitionRegion_Click" Height="49"/>
+            <Button x:Name="btRecognition" Content="识别" Margin="81,165,66,0" VerticalAlignment="Top" Height="48" Click="btRecognition_Click"/>
+            <Button x:Name="btOpenPIC" Content="打开图片" Height="48" Click="btOpenPIC_Click"  VerticalAlignment="Top" Margin="81,28,66,0" HorizontalAlignment="Center" Width="117"/>
+        </Grid>
+
+
+    </Grid>
+</Window>
