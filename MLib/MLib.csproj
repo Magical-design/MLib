@@ -56,6 +56,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Log\LogS.xaml.cs">
+      <DependentUpon>LogS.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MFile\Csv.cs" />
     <Compile Include="MFile\Excel.cs" />
     <Compile Include="MFile\IXml.cs" />
@@ -74,6 +77,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Log\Log.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Log\LogS.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -10,13 +10,41 @@ using System.Diagnostics;
 using HalconViewer;
 using HalconDotNet;
 using ViewROI;
+using MLib;
 
 namespace HalconViewer
 {
     //为了统一，从GW137项目（2019/12/1）开始，图像Row为X，Col为Y（之前是反的）
     public static class VisionManager
     {
-        /*
+        public static HImage HObjectToHImage(HObject hObject)
+        {
+            HImage hImage = null;
+            try
+            {
+                HTuple channels;
+                HOperatorSet.CountChannels(hObject, out channels);
+                if (channels.I == 1)
+                {
+                    HTuple pointer, htype, width, height;
+                    HOperatorSet.GetImagePointer1(hObject, out pointer, out htype, out width, out height);
+                    hImage = new HImage();
+                    hImage.GenImage1(htype.S, width.I, height.I, pointer.IP);
+                }
+                else if (channels.I == 3)
+                {
+                    HTuple pointerR, pointerG, pointerB, htype, width, height;
+                    HOperatorSet.GetImagePointer3(hObject, out pointerR, out pointerG, out pointerB, out htype, out width, out height);
+                    hImage = new HImage();
+                    hImage.GenImage3(htype.S, width.I, height.I, pointerR.IP, pointerG.IP, pointerB.IP);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("HObjectToHImage;" + ex.Message);
+            }
+            return hImage;
+        }
         //公用的模板ID
         public static HTuple ShapeModelID = null;
         /// <summary>
@@ -210,7 +238,7 @@ namespace HalconViewer
         /// <param name="_ImageViewer">指定的图像窗口，显示识别结果用</param>
         /// <param name="_Msg">是否弹出MessageBox</param>
         /// <returns></returns>
-        public static double[] FindShapeModel(string _ShapModelPath, string _RegionPath, HObject _Image, ImageViewer _ImageViewer = null, bool _Msg = false, double _Score = 0.5)
+        public static double[] FindShapeModel(string _ShapModelPath, string _RegionPath, HObject _Image, ImageViewer _ImageViewer = null, bool _Msg = false, double _Score = 0.5, int _AngleStart = -30, int _AngleExtent = 60)
         {
             if (_ImageViewer != null)
             {
@@ -240,7 +268,7 @@ namespace HalconViewer
                 else
                     HOperatorSet.ReduceDomain(_Image, ReadROI(_RegionPath).getRegion(), out image);
 
-                HOperatorSet.FindShapeModel(image, mModelID, (new HTuple(-30)).TupleRad(), (new HTuple(60)).TupleRad(), _Score, 1, 0.5, "least_squares",
+                HOperatorSet.FindShapeModel(image, mModelID, (new HTuple(_AngleStart)).TupleRad(), (new HTuple(_AngleExtent)).TupleRad(), _Score, 1, 0.5, "least_squares",
        0, 0.5, out calibRowCheck, out calibColumnCheck, out calibAngleCheck, out calibScore);
 
                 HOperatorSet.GetShapeModelContours(out calibShapeModel, mModelID, 1);
@@ -279,7 +307,6 @@ namespace HalconViewer
 
             return xy;
         }
-
         /// <summary>
         /// 查找实心圆，返回中心
         /// </summary>
@@ -601,7 +628,7 @@ namespace HalconViewer
                     HOperatorSet.ReduceDomain(_Image, mROI.getRegion(), out image);
 
                 HObject xld = null;
-                string result = BarCode.GetBarCode(image, ref xld);
+                string result = Barcode.GetBarCode(image, ref xld);
                 Console.WriteLine("bar:" + result);
 
                 if (_ImageViewer != null)
@@ -745,687 +772,687 @@ namespace HalconViewer
             }
         }
 
-        /// <summary>
-        /// 开始标定函数
-        /// </summary>
-        /// <param name="_ShapeModelPath">标定时的模板文件路径</param>
-        /// <param name="_RegionPath">标定时的ROI目录</param>
-        /// <param name="_CalibMode">标定模式 9:9点标定;12:9点加旋转标定</param>
-        /// <param name="_CalibDataPath">标定文件保存目录</param>
-        /// <param name="_CameraName">相机类型</param>
-        /// <param name="_ImageViewer">图像窗口</param>
-        /// <param name="_Active_Calib_Link">标定时使用的机械手连接</param>
-        /// <param name="_CalibAxisX">标定时X坐标</param>
-        /// <param name="_CalibAxisY">标定时Y坐标</param>
-        public static async void StartCalibration(string _ShapeModelPath, string _RegionPath, int _CalibMode, string _CalibDataPath, string _CameraName, ImageViewer _ImageViewer, DXH.Net.DXHTCPClient _Active_Calib_Link, double _CalibAxisX = 0, double _CalibAxisY = 0)
-        {
-            if (!HasStartCalib)
-                HasStartCalib = true;
-            else
-            {
-                HasStartCalib = false;
-                return;
-            }
+        ///// <summary>
+        ///// 开始标定函数
+        ///// </summary>
+        ///// <param name="_ShapeModelPath">标定时的模板文件路径</param>
+        ///// <param name="_RegionPath">标定时的ROI目录</param>
+        ///// <param name="_CalibMode">标定模式 9:9点标定;12:9点加旋转标定</param>
+        ///// <param name="_CalibDataPath">标定文件保存目录</param>
+        ///// <param name="_CameraName">相机类型</param>
+        ///// <param name="_ImageViewer">图像窗口</param>
+        ///// <param name="_Active_Calib_Link">标定时使用的机械手连接</param>
+        ///// <param name="_CalibAxisX">标定时X坐标</param>
+        ///// <param name="_CalibAxisY">标定时Y坐标</param>
+        //public static async void StartCalibration(string _ShapeModelPath, string _RegionPath, int _CalibMode, string _CalibDataPath, string _CameraName, ImageViewer _ImageViewer, DXH.Net.DXHTCPClient _Active_Calib_Link, double _CalibAxisX = 0, double _CalibAxisY = 0)
+        //{
+        //    if (!HasStartCalib)
+        //        HasStartCalib = true;
+        //    else
+        //    {
+        //        HasStartCalib = false;
+        //        return;
+        //    }
 
-            if (_Active_Calib_Link.ConnectState != "Connected")
-                _Active_Calib_Link.StartTCPConnect();
+        //    if (_Active_Calib_Link.ConnectState != "Connected")
+        //        _Active_Calib_Link.StartTCPConnect();
 
-            if (_Active_Calib_Link.ConnectState != "Connected")
-            {
-                Console.WriteLine("标定程序未连接.");
-                await Task.Delay(1000);
-            }
-            if (_Active_Calib_Link.ConnectState != "Connected")
-            {
-                Console.WriteLine("标定程序未连接..");
-                await Task.Delay(1000);
-            }
-            if (_Active_Calib_Link.ConnectState != "Connected")
-            {
-                Console.WriteLine("标定程序未连接...");
-                await Task.Delay(1000);
-            }
-            if (_Active_Calib_Link.ConnectState != "Connected")
-            {
-                Console.WriteLine("标定程序未连接....");
-                await Task.Delay(1000);
-            }
-            if (_Active_Calib_Link.ConnectState != "Connected")
-            {
-                Console.WriteLine("标定程序未连接.....");
-                Console.WriteLine("标定流程退出");
-                HasStartCalib = false;
-                return;
-            }
+        //    if (_Active_Calib_Link.ConnectState != "Connected")
+        //    {
+        //        Console.WriteLine("标定程序未连接.");
+        //        await Task.Delay(1000);
+        //    }
+        //    if (_Active_Calib_Link.ConnectState != "Connected")
+        //    {
+        //        Console.WriteLine("标定程序未连接..");
+        //        await Task.Delay(1000);
+        //    }
+        //    if (_Active_Calib_Link.ConnectState != "Connected")
+        //    {
+        //        Console.WriteLine("标定程序未连接...");
+        //        await Task.Delay(1000);
+        //    }
+        //    if (_Active_Calib_Link.ConnectState != "Connected")
+        //    {
+        //        Console.WriteLine("标定程序未连接....");
+        //        await Task.Delay(1000);
+        //    }
+        //    if (_Active_Calib_Link.ConnectState != "Connected")
+        //    {
+        //        Console.WriteLine("标定程序未连接.....");
+        //        Console.WriteLine("标定流程退出");
+        //        HasStartCalib = false;
+        //        return;
+        //    }
 
-            Console.WriteLine("标定程序连接成功");
+        //    Console.WriteLine("标定程序连接成功");
 
-            string str = _Active_Calib_Link.TCPSend("START\r\n");
-            Console.WriteLine(str);
-            if (str != "OK\r\n")
-            {
-                System.Windows.MessageBox.Show("连接机械手失败!");
-                HasStartCalib = false;
-                return;
-            }
+        //    string str = _Active_Calib_Link.TCPSend("START\r\n");
+        //    Console.WriteLine(str);
+        //    if (str != "OK\r\n")
+        //    {
+        //        System.Windows.MessageBox.Show("连接机械手失败!");
+        //        HasStartCalib = false;
+        //        return;
+        //    }
 
-            List<double> Px = new List<double>();
-            List<double> Py = new List<double>();
-            List<double> Qx = new List<double>();
-            List<double> Qy = new List<double>();
-            List<double> Rx = new List<double>();
-            List<double> Ry = new List<double>();
+        //    List<double> Px = new List<double>();
+        //    List<double> Py = new List<double>();
+        //    List<double> Qx = new List<double>();
+        //    List<double> Qy = new List<double>();
+        //    List<double> Rx = new List<double>();
+        //    List<double> Ry = new List<double>();
 
-            Px.Clear();
-            Py.Clear();
-            Qx.Clear();
-            Qy.Clear();
-            Rx.Clear();
-            Ry.Clear();
+        //    Px.Clear();
+        //    Py.Clear();
+        //    Qx.Clear();
+        //    Qy.Clear();
+        //    Rx.Clear();
+        //    Ry.Clear();
 
-            HTuple calibHomMat2D;
+        //    HTuple calibHomMat2D;
 
-            int step = 0;
-            int curstep = -1;
-            double CalibAxisX = 0;
-            double CalibAxisY = 0;
-            double CalibAxisR = 0;
+        //    int step = 0;
+        //    int curstep = -1;
+        //    double CalibAxisX = 0;
+        //    double CalibAxisY = 0;
+        //    double CalibAxisR = 0;
 
-            double TargetX = 0;
-            double TargetY = 0;
-            double TargetR = 0;
+        //    double TargetX = 0;
+        //    double TargetY = 0;
+        //    double TargetR = 0;
 
-            while (HasStartCalib)
-            {
-                bool mMoveResult = true;
-                Task WritePLC_Task = Task.Run(() =>
-                {
-                    if (curstep != step)
-                    {
-                        curstep = step;
-                        if (curstep == 0)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 1)
-                        {
-                            TargetX = CalibAxisX + 5;
-                            TargetY = CalibAxisY + 0;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 2)
-                        {
-                            TargetX = CalibAxisX + 5;
-                            TargetY = CalibAxisY + 5;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 3)
-                        {
-                            TargetX = CalibAxisX + 0;
-                            TargetY = CalibAxisY + 5;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 4)
-                        {
-                            TargetX = CalibAxisX - 5;
-                            TargetY = CalibAxisY + 5;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 5)
-                        {
-                            TargetX = CalibAxisX - 5;
-                            TargetY = CalibAxisY - 0;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 6)
-                        {
-                            TargetX = CalibAxisX - 5;
-                            TargetY = CalibAxisY - 5;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 7)
-                        {
-                            TargetX = CalibAxisX - 0;
-                            TargetY = CalibAxisY - 5;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 8)
-                        {
-                            TargetX = CalibAxisX + 5;
-                            TargetY = CalibAxisY - 5;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 9)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 10)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR + 5;
-                        }
-                        else if (curstep == 11)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR - 5;
-                        }
-                        Console.WriteLine("X:" + TargetX + " Y:" + TargetY + " R:" + TargetR);
+        //    while (HasStartCalib)
+        //    {
+        //        bool mMoveResult = true;
+        //        Task WritePLC_Task = Task.Run(() =>
+        //        {
+        //            if (curstep != step)
+        //            {
+        //                curstep = step;
+        //                if (curstep == 0)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 1)
+        //                {
+        //                    TargetX = CalibAxisX + 5;
+        //                    TargetY = CalibAxisY + 0;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 2)
+        //                {
+        //                    TargetX = CalibAxisX + 5;
+        //                    TargetY = CalibAxisY + 5;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 3)
+        //                {
+        //                    TargetX = CalibAxisX + 0;
+        //                    TargetY = CalibAxisY + 5;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 4)
+        //                {
+        //                    TargetX = CalibAxisX - 5;
+        //                    TargetY = CalibAxisY + 5;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 5)
+        //                {
+        //                    TargetX = CalibAxisX - 5;
+        //                    TargetY = CalibAxisY - 0;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 6)
+        //                {
+        //                    TargetX = CalibAxisX - 5;
+        //                    TargetY = CalibAxisY - 5;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 7)
+        //                {
+        //                    TargetX = CalibAxisX - 0;
+        //                    TargetY = CalibAxisY - 5;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 8)
+        //                {
+        //                    TargetX = CalibAxisX + 5;
+        //                    TargetY = CalibAxisY - 5;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 9)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 10)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR + 5;
+        //                }
+        //                else if (curstep == 11)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR - 5;
+        //                }
+        //                Console.WriteLine("X:" + TargetX + " Y:" + TargetY + " R:" + TargetR);
 
-                        string mMotionStr = _Active_Calib_Link.TCPSend(TargetX + "," + TargetY + "," + TargetR + "\r\n", true, 3000);
-                        Console.WriteLine(mMotionStr);
+        //                string mMotionStr = _Active_Calib_Link.TCPSend(TargetX + "," + TargetY + "," + TargetR + "\r\n", true, 3000);
+        //                Console.WriteLine(mMotionStr);
 
-                    }
-                });
-                await WritePLC_Task;
+        //            }
+        //        });
+        //        await WritePLC_Task;
 
-                await Task.Delay(3000);
-                if (mMoveResult)
-                {
-                    //Task Task_AcquireImage = Task.Run(() =>
-                    //{
-                    if (_CameraName == "上相机")
-                    {
-                        try
-                        {
-                            CameraManager.Camera_1_AcquireImage(_ImageViewer);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Windows.MessageBox.Show("Camera_1_AcquireImage:" + ex.Message);
-                        }
-                    }
-                    else if (_CameraName == "下相机")
-                    {
-                        try
-                        {
-                            CameraManager.Camera_2_AcquireImage(_ImageViewer);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Windows.MessageBox.Show("Camera_2_AcquireImage:" + ex.Message);
-                        }
-                    }
-                    //});
-                    //await Task_AcquireImage;
+        //        await Task.Delay(3000);
+        //        if (mMoveResult)
+        //        {
+        //            //Task Task_AcquireImage = Task.Run(() =>
+        //            //{
+        //            if (_CameraName == "上相机")
+        //            {
+        //                try
+        //                {
+        //                    CameraManager.Camera_1_AcquireImage(_ImageViewer);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    System.Windows.MessageBox.Show("Camera_1_AcquireImage:" + ex.Message);
+        //                }
+        //            }
+        //            else if (_CameraName == "下相机")
+        //            {
+        //                try
+        //                {
+        //                    CameraManager.Camera_2_AcquireImage(_ImageViewer);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    System.Windows.MessageBox.Show("Camera_2_AcquireImage:" + ex.Message);
+        //                }
+        //            }
+        //            //});
+        //            //await Task_AcquireImage;
 
-                    DXH.WPF.DXHWPF.DoEvents();
-                    await Task.Delay(1);
+        //            DXH.WPF.DXHWPF.DoEvents();
+        //            await Task.Delay(1);
 
-                    Task Task_SaveImage = Task.Run(() =>
-                    {
-                        if (_CameraName == "上相机")
-                        {
-                            try
-                            {
-                                CameraManager.Camera_1_SaveImage(_ShapeModelPath.Remove(_ShapeModelPath.LastIndexOf("\\")) + "\\Calib_1\\" + step + ".png");
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Windows.MessageBox.Show("Camera_1_SaveImage:" + ex.Message);
-                            }
-                        }
-                        else if (_CameraName == "下相机")
-                        {
-                            try
-                            {
-                                CameraManager.Camera_2_SaveImage(_ShapeModelPath.Remove(_ShapeModelPath.LastIndexOf("\\")) + "\\Calib_2\\" + step + ".png");
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Windows.MessageBox.Show("Camera_2_SaveImage:" + ex.Message);
-                            }
-                        }
-                    });
-                    await Task_SaveImage;
+        //            Task Task_SaveImage = Task.Run(() =>
+        //            {
+        //                if (_CameraName == "上相机")
+        //                {
+        //                    try
+        //                    {
+        //                        CameraManager.Camera_1_SaveImage(_ShapeModelPath.Remove(_ShapeModelPath.LastIndexOf("\\")) + "\\Calib_1\\" + step + ".png");
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        System.Windows.MessageBox.Show("Camera_1_SaveImage:" + ex.Message);
+        //                    }
+        //                }
+        //                else if (_CameraName == "下相机")
+        //                {
+        //                    try
+        //                    {
+        //                        CameraManager.Camera_2_SaveImage(_ShapeModelPath.Remove(_ShapeModelPath.LastIndexOf("\\")) + "\\Calib_2\\" + step + ".png");
+        //                    }
+        //                    catch (Exception ex)
+        //                    {
+        //                        System.Windows.MessageBox.Show("Camera_2_SaveImage:" + ex.Message);
+        //                    }
+        //                }
+        //            });
+        //            await Task_SaveImage;
 
-                    double[] xy = FindShapeModel(_ShapeModelPath, _RegionPath, _ImageViewer.Image, _ImageViewer, true);
+        //            double[] xy = FindShapeModel(_ShapeModelPath, _RegionPath, _ImageViewer.Image, _ImageViewer, true);
 
-                    Console.WriteLine("第" + (step + 1) + "步: ");
-                    step++;
-                    DXH.WPF.DXHWPF.DoEvents();
-                    await Task.Delay(1);
+        //            Console.WriteLine("第" + (step + 1) + "步: ");
+        //            step++;
+        //            DXH.WPF.DXHWPF.DoEvents();
+        //            await Task.Delay(1);
 
-                    if (xy[0] == 0 && xy[1] == 0)
-                    {
-                        Console.WriteLine("相机标定失败!");
-                        Console.WriteLine("相机标定失败!");
-                        HasStartCalib = false;
-                        break;
-                    }
-                    if (step <= 9)
-                    {
-                        Px.Add(xy[0]);
-                        Py.Add(xy[1]);
+        //            if (xy[0] == 0 && xy[1] == 0)
+        //            {
+        //                Console.WriteLine("相机标定失败!");
+        //                Console.WriteLine("相机标定失败!");
+        //                HasStartCalib = false;
+        //                break;
+        //            }
+        //            if (step <= 9)
+        //            {
+        //                Px.Add(xy[0]);
+        //                Py.Add(xy[1]);
 
-                        Qx.Add(TargetX + _CalibAxisX);
-                        Qy.Add(TargetY + _CalibAxisY);
-                    }
-                    else
-                    {
-                        Rx.Add(xy[0]);
-                        Ry.Add(xy[1]);
-                    }
+        //                Qx.Add(TargetX + _CalibAxisX);
+        //                Qy.Add(TargetY + _CalibAxisY);
+        //            }
+        //            else
+        //            {
+        //                Rx.Add(xy[0]);
+        //                Ry.Add(xy[1]);
+        //            }
 
-                    //await Task.Delay(500);
+        //            //await Task.Delay(500);
 
-                    //mImageViewer1.AppendHObject = null;
+        //            //mImageViewer1.AppendHObject = null;
 
-                    if (step >= _CalibMode)
-                    {
-                        if (_CalibMode > 9)
-                            HOperatorSet.VectorToHomMat2d(
-                                    ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
-                                    ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
-                                    ((((((new HTuple(Qx[0])).TupleConcat(Qx[1])).TupleConcat(Qx[2])).TupleConcat(Qx[3])).TupleConcat(Qx[4])).TupleConcat(Qx[5])).TupleConcat(Qx[6]).TupleConcat(Qx[7]).TupleConcat(Qx[8]),
-                                    ((((((new HTuple(Qy[0])).TupleConcat(Qy[1])).TupleConcat(Qy[2])).TupleConcat(Qy[3])).TupleConcat(Qy[4])).TupleConcat(Qy[5])).TupleConcat(Qy[6]).TupleConcat(Qy[7]).TupleConcat(Qy[8]), out calibHomMat2D);
-                        else//移动的相机9点标定时，XY移动方向要取反
-                            HOperatorSet.VectorToHomMat2d(
-                                    ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
-                                    ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
-                                    ((((((new HTuple(Qx[0])).TupleConcat(Qx[5])).TupleConcat(Qx[6])).TupleConcat(Qx[7])).TupleConcat(Qx[8])).TupleConcat(Qx[1])).TupleConcat(Qx[2]).TupleConcat(Qx[3]).TupleConcat(Qx[4]),
-                                    ((((((new HTuple(Qy[0])).TupleConcat(Qy[5])).TupleConcat(Qy[6])).TupleConcat(Qy[7])).TupleConcat(Qy[8])).TupleConcat(Qy[1])).TupleConcat(Qy[2]).TupleConcat(Qy[3]).TupleConcat(Qy[4]), out calibHomMat2D);
-
-
-                        if (_CalibMode > 9)
-                        {
-                            var roxy = rotateCenter(Rx[0], Ry[0], Rx[1], Ry[1], Rx[2], Ry[2]);
-
-                            HTuple hv_Qx, hv_Qy;
-                            HOperatorSet.AffineTransPoint2d(calibHomMat2D, roxy[0], roxy[1], out hv_Qx, out hv_Qy);
-                            double bx = Qx[0] - hv_Qx.D;
-                            double by = Qy[0] - hv_Qy.D;
-
-                            HOperatorSet.VectorToHomMat2d(
-                                    ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
-                                    ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
-                                    ((((((new HTuple(Qx[0] + bx)).TupleConcat(Qx[1] + bx)).TupleConcat(Qx[2] + bx)).TupleConcat(Qx[3] + bx)).TupleConcat(Qx[4] + bx)).TupleConcat(Qx[5] + bx)).TupleConcat(Qx[6] + bx).TupleConcat(Qx[7] + bx).TupleConcat(Qx[8] + bx),
-                                    ((((((new HTuple(Qy[0] + by)).TupleConcat(Qy[1] + by)).TupleConcat(Qy[2] + by)).TupleConcat(Qy[3] + by)).TupleConcat(Qy[4] + by)).TupleConcat(Qy[5] + by)).TupleConcat(Qy[6] + by).TupleConcat(Qy[7] + by).TupleConcat(Qy[8] + by), out calibHomMat2D);
+        //            if (step >= _CalibMode)
+        //            {
+        //                if (_CalibMode > 9)
+        //                    HOperatorSet.VectorToHomMat2d(
+        //                            ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
+        //                            ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
+        //                            ((((((new HTuple(Qx[0])).TupleConcat(Qx[1])).TupleConcat(Qx[2])).TupleConcat(Qx[3])).TupleConcat(Qx[4])).TupleConcat(Qx[5])).TupleConcat(Qx[6]).TupleConcat(Qx[7]).TupleConcat(Qx[8]),
+        //                            ((((((new HTuple(Qy[0])).TupleConcat(Qy[1])).TupleConcat(Qy[2])).TupleConcat(Qy[3])).TupleConcat(Qy[4])).TupleConcat(Qy[5])).TupleConcat(Qy[6]).TupleConcat(Qy[7]).TupleConcat(Qy[8]), out calibHomMat2D);
+        //                else//移动的相机9点标定时，XY移动方向要取反
+        //                    HOperatorSet.VectorToHomMat2d(
+        //                            ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
+        //                            ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
+        //                            ((((((new HTuple(Qx[0])).TupleConcat(Qx[5])).TupleConcat(Qx[6])).TupleConcat(Qx[7])).TupleConcat(Qx[8])).TupleConcat(Qx[1])).TupleConcat(Qx[2]).TupleConcat(Qx[3]).TupleConcat(Qx[4]),
+        //                            ((((((new HTuple(Qy[0])).TupleConcat(Qy[5])).TupleConcat(Qy[6])).TupleConcat(Qy[7])).TupleConcat(Qy[8])).TupleConcat(Qy[1])).TupleConcat(Qy[2]).TupleConcat(Qy[3]).TupleConcat(Qy[4]), out calibHomMat2D);
 
 
-                        }
-                        HOperatorSet.WriteTuple(calibHomMat2D, _CalibDataPath);
+        //                if (_CalibMode > 9)
+        //                {
+        //                    var roxy = rotateCenter(Rx[0], Ry[0], Rx[1], Ry[1], Rx[2], Ry[2]);
 
-                        Console.WriteLine("相机标定成功!");
-                        Console.WriteLine("相机标定成功!");
-                        System.Windows.MessageBox.Show("相机标定成功!");
-                        HasStartCalib = false;
+        //                    HTuple hv_Qx, hv_Qy;
+        //                    HOperatorSet.AffineTransPoint2d(calibHomMat2D, roxy[0], roxy[1], out hv_Qx, out hv_Qy);
+        //                    double bx = Qx[0] - hv_Qx.D;
+        //                    double by = Qy[0] - hv_Qy.D;
 
-                        if (_CalibMode == 9)
-                        {//固定的相机保存标定时的轴坐标
-                            Console.WriteLine("开始保存标定时机械坐标..");
-                            string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
-                            string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
-                            HTuple mCalibAxisX = new HTuple(CalibAxisX);
-                            HTuple mCalibAxisY = new HTuple(CalibAxisY);
-                            Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
-                            HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
-                            HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
-                            Console.WriteLine("标定时坐标保存完成");
-                        }
-                        else
-                        {//固定的相机保存标定时的轴坐标
-                            Console.WriteLine("开始保存标定时机械坐标..");
-                            string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
-                            string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
-                            HTuple mCalibAxisX = new HTuple(CalibAxisX);
-                            HTuple mCalibAxisY = new HTuple(CalibAxisY);
-                            Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
-                            HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
-                            HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
-                            Console.WriteLine("标定时坐标保存完成");
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("轴没有到位");
-                    Console.WriteLine("结束");
-                    HasStartCalib = false;
-                    return;
-                }
-            }
-            Console.WriteLine("结束");
-            HasStartCalib = false;
-
-            Task FinishPLC_Task = Task.Run(() =>
-            {
-                string mMotionStr = _Active_Calib_Link.TCPSend(0 + "," + 0 + "," + 0 + "\r\n", true, 3000);
-                Console.WriteLine(mMotionStr);
-                System.Threading.Thread.Sleep(3000);
-            });
-            await FinishPLC_Task;
-            if (_CameraName == "上相机")
-            {
-                try
-                {
-                    CameraManager.Camera_1_AcquireImage(_ImageViewer);
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show("Camera_1_AcquireImage:" + ex.Message);
-                }
-            }
-            else if (_CameraName == "下相机")
-            {
-                try
-                {
-                    CameraManager.Camera_2_AcquireImage(_ImageViewer);
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show("Camera_2_AcquireImage:" + ex.Message);
-                }
-            }
-
-            try
-            {
-                _Active_Calib_Link.Close();
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// 读取本地图像标定相机
-        /// </summary>
-        /// <param name="_CalibImagePath">标定时的图像文件目录</param>
-        /// <param name="_ShapeModelPath">标定时的模板文件目录</param>
-        /// <param name="_RegionPath">标定时的ROI目录</param>
-        /// <param name="_CalibMode">标定模式 9:9点标定;12:9点加旋转标定</param>
-        /// <param name="_CalibDataPath">标定文件保存目录</param>
-        /// <param name="_CameraName">相机类型</param>
-        /// <param name="_ImageViewer">图像窗口</param>
-        /// <param name="_CalibAxisX">拍照时X坐标</param>
-        /// <param name="_CalibAxisY">拍照时Y坐标</param>
-        /// <param name="_CalibAxisR">拍照时R坐标</param>
-        public async static void Calibration_WithLocalImage(string _CalibImagePath, string _ShapeModelPath, string _RegionPath, int _CalibMode, string _CalibDataPath, string _CameraName, ImageViewer _ImageViewer, double _CalibAxisX = 0, double _CalibAxisY = 0, double _CalibAxisR = 0, double _CalibOffset = 5)
-        {
-            if (!HasStartCalib)
-                HasStartCalib = true;
-            else
-            {
-                HasStartCalib = false;
-                return;
-            }
-
-            List<double> Px = new List<double>();
-            List<double> Py = new List<double>();
-            List<double> Qx = new List<double>();
-            List<double> Qy = new List<double>();
-            List<double> Rx = new List<double>();
-            List<double> Ry = new List<double>();
-
-            Px.Clear();
-            Py.Clear();
-            Qx.Clear();
-            Qy.Clear();
-            Rx.Clear();
-            Ry.Clear();
-
-            HTuple calibHomMat2D;
-
-            int step = 0;
-            int curstep = -1;
-            double CalibAxisX = _CalibAxisX;
-            double CalibAxisY = _CalibAxisY;
-            double CalibAxisR = _CalibAxisR;
-
-            double TargetX = 0;
-            double TargetY = 0;
-            double TargetR = 0;
-
-            while (HasStartCalib)
-            {
-                bool mMoveResult = true;
-                Task WritePLC_Task = Task.Run(() =>
-                {
-                    if (curstep != step)
-                    {
-                        curstep = step;
-                        if (curstep == 0)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 1)
-                        {
-                            TargetX = CalibAxisX + _CalibOffset;
-                            TargetY = CalibAxisY + 0;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 2)
-                        {
-                            TargetX = CalibAxisX + _CalibOffset;
-                            TargetY = CalibAxisY + _CalibOffset;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 3)
-                        {
-                            TargetX = CalibAxisX + 0;
-                            TargetY = CalibAxisY + _CalibOffset;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 4)
-                        {
-                            TargetX = CalibAxisX - _CalibOffset;
-                            TargetY = CalibAxisY + _CalibOffset;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 5)
-                        {
-                            TargetX = CalibAxisX - _CalibOffset;
-                            TargetY = CalibAxisY - 0;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 6)
-                        {
-                            TargetX = CalibAxisX - _CalibOffset;
-                            TargetY = CalibAxisY - _CalibOffset;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 7)
-                        {
-                            TargetX = CalibAxisX - 0;
-                            TargetY = CalibAxisY - _CalibOffset;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 8)
-                        {
-                            TargetX = CalibAxisX + _CalibOffset;
-                            TargetY = CalibAxisY - _CalibOffset;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 9)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR;
-                        }
-                        else if (curstep == 10)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR + 5;
-                        }
-                        else if (curstep == 11)
-                        {
-                            TargetX = CalibAxisX;
-                            TargetY = CalibAxisY;
-                            TargetR = CalibAxisR - 5;
-                        }
-                        Console.WriteLine("X:" + TargetX + " Y:" + TargetY + " R:" + TargetR);
-                    }
-                });
-                await WritePLC_Task;
-
-                await Task.Delay(1000);
-                if (mMoveResult)
-                {
-                    if (_CameraName == "上相机")
-                    {
-                        try
-                        {
-                            CameraManager.Camera_1_ReadImage(_ImageViewer, _CalibImagePath + curstep);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Windows.MessageBox.Show("Camera_1_ReadImage:" + ex.Message);
-                        }
-                    }
-                    else if (_CameraName == "下相机")
-                    {
-                        try
-                        {
-                            CameraManager.Camera_2_ReadImage(_ImageViewer, _CalibImagePath + curstep);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Windows.MessageBox.Show("Camera_2_ReadImage:" + ex.Message);
-                        }
-                    }
-
-                    DXH.WPF.DXHWPF.DoEvents();
-                    await Task.Delay(1);
-
-                    double[] xy = FindShapeModel(_ShapeModelPath, _RegionPath, _ImageViewer.Image, _ImageViewer, true);
-
-                    Console.WriteLine("第" + (step + 1) + "步: ");
-                    step++;
-                    DXH.WPF.DXHWPF.DoEvents();
-                    await Task.Delay(1);
-
-                    if (xy[0] == 0 && xy[1] == 0)
-                    {
-                        Console.WriteLine("相机标定失败!");
-                        Console.WriteLine("相机标定失败!");
-                        HasStartCalib = false;
-                        break;
-                    }
-                    if (step <= 9)
-                    {
-                        Px.Add(xy[0]);
-                        Py.Add(xy[1]);
-
-                        Qx.Add(TargetX);
-                        Qy.Add(TargetY);
-                    }
-                    else
-                    {
-                        Rx.Add(xy[0]);
-                        Ry.Add(xy[1]);
-                    }
-
-                    if (step >= _CalibMode)
-                    {
-                        if (_CalibMode > 9)
-                            HOperatorSet.VectorToHomMat2d(
-                                    ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
-                                    ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
-                                    ((((((new HTuple(Qx[0])).TupleConcat(Qx[1])).TupleConcat(Qx[2])).TupleConcat(Qx[3])).TupleConcat(Qx[4])).TupleConcat(Qx[5])).TupleConcat(Qx[6]).TupleConcat(Qx[7]).TupleConcat(Qx[8]),
-                                    ((((((new HTuple(Qy[0])).TupleConcat(Qy[1])).TupleConcat(Qy[2])).TupleConcat(Qy[3])).TupleConcat(Qy[4])).TupleConcat(Qy[5])).TupleConcat(Qy[6]).TupleConcat(Qy[7]).TupleConcat(Qy[8]), out calibHomMat2D);
-                        else//移动的相机9点标定时，XY移动方向要取反
-                            HOperatorSet.VectorToHomMat2d(
-                                    ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
-                                    ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
-                                    ((((((new HTuple(Qx[0])).TupleConcat(Qx[5])).TupleConcat(Qx[6])).TupleConcat(Qx[7])).TupleConcat(Qx[8])).TupleConcat(Qx[1])).TupleConcat(Qx[2]).TupleConcat(Qx[3]).TupleConcat(Qx[4]),
-                                    ((((((new HTuple(Qy[0])).TupleConcat(Qy[5])).TupleConcat(Qy[6])).TupleConcat(Qy[7])).TupleConcat(Qy[8])).TupleConcat(Qy[1])).TupleConcat(Qy[2]).TupleConcat(Qy[3]).TupleConcat(Qy[4]), out calibHomMat2D);
+        //                    HOperatorSet.VectorToHomMat2d(
+        //                            ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
+        //                            ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
+        //                            ((((((new HTuple(Qx[0] + bx)).TupleConcat(Qx[1] + bx)).TupleConcat(Qx[2] + bx)).TupleConcat(Qx[3] + bx)).TupleConcat(Qx[4] + bx)).TupleConcat(Qx[5] + bx)).TupleConcat(Qx[6] + bx).TupleConcat(Qx[7] + bx).TupleConcat(Qx[8] + bx),
+        //                            ((((((new HTuple(Qy[0] + by)).TupleConcat(Qy[1] + by)).TupleConcat(Qy[2] + by)).TupleConcat(Qy[3] + by)).TupleConcat(Qy[4] + by)).TupleConcat(Qy[5] + by)).TupleConcat(Qy[6] + by).TupleConcat(Qy[7] + by).TupleConcat(Qy[8] + by), out calibHomMat2D);
 
 
-                        if (_CalibMode > 9)
-                        {
-                            var roxy = rotateCenter(Rx[0], Ry[0], Rx[1], Ry[1], Rx[2], Ry[2]);
+        //                }
+        //                HOperatorSet.WriteTuple(calibHomMat2D, _CalibDataPath);
 
-                            HTuple hv_Qx, hv_Qy;
-                            HOperatorSet.AffineTransPoint2d(calibHomMat2D, roxy[0], roxy[1], out hv_Qx, out hv_Qy);
-                            double bx = Qx[0] - hv_Qx.D;
-                            double by = Qy[0] - hv_Qy.D;
+        //                Console.WriteLine("相机标定成功!");
+        //                Console.WriteLine("相机标定成功!");
+        //                System.Windows.MessageBox.Show("相机标定成功!");
+        //                HasStartCalib = false;
 
-                            HOperatorSet.VectorToHomMat2d(
-                                    ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
-                                    ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
-                                    ((((((new HTuple(Qx[0] + bx)).TupleConcat(Qx[1] + bx)).TupleConcat(Qx[2] + bx)).TupleConcat(Qx[3] + bx)).TupleConcat(Qx[4] + bx)).TupleConcat(Qx[5] + bx)).TupleConcat(Qx[6] + bx).TupleConcat(Qx[7] + bx).TupleConcat(Qx[8] + bx),
-                                    ((((((new HTuple(Qy[0] + by)).TupleConcat(Qy[1] + by)).TupleConcat(Qy[2] + by)).TupleConcat(Qy[3] + by)).TupleConcat(Qy[4] + by)).TupleConcat(Qy[5] + by)).TupleConcat(Qy[6] + by).TupleConcat(Qy[7] + by).TupleConcat(Qy[8] + by), out calibHomMat2D);
+        //                if (_CalibMode == 9)
+        //                {//固定的相机保存标定时的轴坐标
+        //                    Console.WriteLine("开始保存标定时机械坐标..");
+        //                    string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
+        //                    string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
+        //                    HTuple mCalibAxisX = new HTuple(CalibAxisX);
+        //                    HTuple mCalibAxisY = new HTuple(CalibAxisY);
+        //                    Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
+        //                    HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
+        //                    HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
+        //                    Console.WriteLine("标定时坐标保存完成");
+        //                }
+        //                else
+        //                {//固定的相机保存标定时的轴坐标
+        //                    Console.WriteLine("开始保存标定时机械坐标..");
+        //                    string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
+        //                    string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
+        //                    HTuple mCalibAxisX = new HTuple(CalibAxisX);
+        //                    HTuple mCalibAxisY = new HTuple(CalibAxisY);
+        //                    Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
+        //                    HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
+        //                    HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
+        //                    Console.WriteLine("标定时坐标保存完成");
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("轴没有到位");
+        //            Console.WriteLine("结束");
+        //            HasStartCalib = false;
+        //            return;
+        //        }
+        //    }
+        //    Console.WriteLine("结束");
+        //    HasStartCalib = false;
+
+        //    Task FinishPLC_Task = Task.Run(() =>
+        //    {
+        //        string mMotionStr = _Active_Calib_Link.TCPSend(0 + "," + 0 + "," + 0 + "\r\n", true, 3000);
+        //        Console.WriteLine(mMotionStr);
+        //        System.Threading.Thread.Sleep(3000);
+        //    });
+        //    await FinishPLC_Task;
+        //    if (_CameraName == "上相机")
+        //    {
+        //        try
+        //        {
+        //            CameraManager.Camera_1_AcquireImage(_ImageViewer);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            System.Windows.MessageBox.Show("Camera_1_AcquireImage:" + ex.Message);
+        //        }
+        //    }
+        //    else if (_CameraName == "下相机")
+        //    {
+        //        try
+        //        {
+        //            CameraManager.Camera_2_AcquireImage(_ImageViewer);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            System.Windows.MessageBox.Show("Camera_2_AcquireImage:" + ex.Message);
+        //        }
+        //    }
+
+        //    try
+        //    {
+        //        _Active_Calib_Link.Close();
+        //    }
+        //    catch { }
+        //}
+
+        ///// <summary>
+        ///// 读取本地图像标定相机
+        ///// </summary>
+        ///// <param name="_CalibImagePath">标定时的图像文件目录</param>
+        ///// <param name="_ShapeModelPath">标定时的模板文件目录</param>
+        ///// <param name="_RegionPath">标定时的ROI目录</param>
+        ///// <param name="_CalibMode">标定模式 9:9点标定;12:9点加旋转标定</param>
+        ///// <param name="_CalibDataPath">标定文件保存目录</param>
+        ///// <param name="_CameraName">相机类型</param>
+        ///// <param name="_ImageViewer">图像窗口</param>
+        ///// <param name="_CalibAxisX">拍照时X坐标</param>
+        ///// <param name="_CalibAxisY">拍照时Y坐标</param>
+        ///// <param name="_CalibAxisR">拍照时R坐标</param>
+        //public async static void Calibration_WithLocalImage(string _CalibImagePath, string _ShapeModelPath, string _RegionPath, int _CalibMode, string _CalibDataPath, string _CameraName, ImageViewer _ImageViewer, double _CalibAxisX = 0, double _CalibAxisY = 0, double _CalibAxisR = 0, double _CalibOffset = 5)
+        //{
+        //    if (!HasStartCalib)
+        //        HasStartCalib = true;
+        //    else
+        //    {
+        //        HasStartCalib = false;
+        //        return;
+        //    }
+
+        //    List<double> Px = new List<double>();
+        //    List<double> Py = new List<double>();
+        //    List<double> Qx = new List<double>();
+        //    List<double> Qy = new List<double>();
+        //    List<double> Rx = new List<double>();
+        //    List<double> Ry = new List<double>();
+
+        //    Px.Clear();
+        //    Py.Clear();
+        //    Qx.Clear();
+        //    Qy.Clear();
+        //    Rx.Clear();
+        //    Ry.Clear();
+
+        //    HTuple calibHomMat2D;
+
+        //    int step = 0;
+        //    int curstep = -1;
+        //    double CalibAxisX = _CalibAxisX;
+        //    double CalibAxisY = _CalibAxisY;
+        //    double CalibAxisR = _CalibAxisR;
+
+        //    double TargetX = 0;
+        //    double TargetY = 0;
+        //    double TargetR = 0;
+
+        //    while (HasStartCalib)
+        //    {
+        //        bool mMoveResult = true;
+        //        Task WritePLC_Task = Task.Run(() =>
+        //        {
+        //            if (curstep != step)
+        //            {
+        //                curstep = step;
+        //                if (curstep == 0)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 1)
+        //                {
+        //                    TargetX = CalibAxisX + _CalibOffset;
+        //                    TargetY = CalibAxisY + 0;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 2)
+        //                {
+        //                    TargetX = CalibAxisX + _CalibOffset;
+        //                    TargetY = CalibAxisY + _CalibOffset;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 3)
+        //                {
+        //                    TargetX = CalibAxisX + 0;
+        //                    TargetY = CalibAxisY + _CalibOffset;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 4)
+        //                {
+        //                    TargetX = CalibAxisX - _CalibOffset;
+        //                    TargetY = CalibAxisY + _CalibOffset;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 5)
+        //                {
+        //                    TargetX = CalibAxisX - _CalibOffset;
+        //                    TargetY = CalibAxisY - 0;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 6)
+        //                {
+        //                    TargetX = CalibAxisX - _CalibOffset;
+        //                    TargetY = CalibAxisY - _CalibOffset;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 7)
+        //                {
+        //                    TargetX = CalibAxisX - 0;
+        //                    TargetY = CalibAxisY - _CalibOffset;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 8)
+        //                {
+        //                    TargetX = CalibAxisX + _CalibOffset;
+        //                    TargetY = CalibAxisY - _CalibOffset;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 9)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR;
+        //                }
+        //                else if (curstep == 10)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR + 5;
+        //                }
+        //                else if (curstep == 11)
+        //                {
+        //                    TargetX = CalibAxisX;
+        //                    TargetY = CalibAxisY;
+        //                    TargetR = CalibAxisR - 5;
+        //                }
+        //                Console.WriteLine("X:" + TargetX + " Y:" + TargetY + " R:" + TargetR);
+        //            }
+        //        });
+        //        await WritePLC_Task;
+
+        //        await Task.Delay(1000);
+        //        if (mMoveResult)
+        //        {
+        //            if (_CameraName == "上相机")
+        //            {
+        //                try
+        //                {
+        //                    CameraManager.Camera_1_ReadImage(_ImageViewer, _CalibImagePath + curstep);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    System.Windows.MessageBox.Show("Camera_1_ReadImage:" + ex.Message);
+        //                }
+        //            }
+        //            else if (_CameraName == "下相机")
+        //            {
+        //                try
+        //                {
+        //                    CameraManager.Camera_2_ReadImage(_ImageViewer, _CalibImagePath + curstep);
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    System.Windows.MessageBox.Show("Camera_2_ReadImage:" + ex.Message);
+        //                }
+        //            }
+
+        //            DXH.WPF.DXHWPF.DoEvents();
+        //            await Task.Delay(1);
+
+        //            double[] xy = FindShapeModel(_ShapeModelPath, _RegionPath, _ImageViewer.Image, _ImageViewer, true);
+
+        //            Console.WriteLine("第" + (step + 1) + "步: ");
+        //            step++;
+        //            DXH.WPF.DXHWPF.DoEvents();
+        //            await Task.Delay(1);
+
+        //            if (xy[0] == 0 && xy[1] == 0)
+        //            {
+        //                Console.WriteLine("相机标定失败!");
+        //                Console.WriteLine("相机标定失败!");
+        //                HasStartCalib = false;
+        //                break;
+        //            }
+        //            if (step <= 9)
+        //            {
+        //                Px.Add(xy[0]);
+        //                Py.Add(xy[1]);
+
+        //                Qx.Add(TargetX);
+        //                Qy.Add(TargetY);
+        //            }
+        //            else
+        //            {
+        //                Rx.Add(xy[0]);
+        //                Ry.Add(xy[1]);
+        //            }
+
+        //            if (step >= _CalibMode)
+        //            {
+        //                if (_CalibMode > 9)
+        //                    HOperatorSet.VectorToHomMat2d(
+        //                            ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
+        //                            ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
+        //                            ((((((new HTuple(Qx[0])).TupleConcat(Qx[1])).TupleConcat(Qx[2])).TupleConcat(Qx[3])).TupleConcat(Qx[4])).TupleConcat(Qx[5])).TupleConcat(Qx[6]).TupleConcat(Qx[7]).TupleConcat(Qx[8]),
+        //                            ((((((new HTuple(Qy[0])).TupleConcat(Qy[1])).TupleConcat(Qy[2])).TupleConcat(Qy[3])).TupleConcat(Qy[4])).TupleConcat(Qy[5])).TupleConcat(Qy[6]).TupleConcat(Qy[7]).TupleConcat(Qy[8]), out calibHomMat2D);
+        //                else//移动的相机9点标定时，XY移动方向要取反
+        //                    HOperatorSet.VectorToHomMat2d(
+        //                            ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
+        //                            ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
+        //                            ((((((new HTuple(Qx[0])).TupleConcat(Qx[5])).TupleConcat(Qx[6])).TupleConcat(Qx[7])).TupleConcat(Qx[8])).TupleConcat(Qx[1])).TupleConcat(Qx[2]).TupleConcat(Qx[3]).TupleConcat(Qx[4]),
+        //                            ((((((new HTuple(Qy[0])).TupleConcat(Qy[5])).TupleConcat(Qy[6])).TupleConcat(Qy[7])).TupleConcat(Qy[8])).TupleConcat(Qy[1])).TupleConcat(Qy[2]).TupleConcat(Qy[3]).TupleConcat(Qy[4]), out calibHomMat2D);
 
 
-                        }
-                        HOperatorSet.WriteTuple(calibHomMat2D, _CalibDataPath);
+        //                if (_CalibMode > 9)
+        //                {
+        //                    var roxy = rotateCenter(Rx[0], Ry[0], Rx[1], Ry[1], Rx[2], Ry[2]);
 
-                        Console.WriteLine("相机标定成功!");
-                        Console.WriteLine("相机标定成功!");
-                        System.Windows.MessageBox.Show("相机标定成功!");
-                        HasStartCalib = false;
+        //                    HTuple hv_Qx, hv_Qy;
+        //                    HOperatorSet.AffineTransPoint2d(calibHomMat2D, roxy[0], roxy[1], out hv_Qx, out hv_Qy);
+        //                    double bx = Qx[0] - hv_Qx.D;
+        //                    double by = Qy[0] - hv_Qy.D;
 
-                        if (_CalibMode == 9)
-                        {
-                            Console.WriteLine("开始保存标定时机械坐标..");
-                            string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
-                            string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
-                            HTuple mCalibAxisX = new HTuple(CalibAxisX);
-                            HTuple mCalibAxisY = new HTuple(CalibAxisY);
-                            Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
-                            HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
-                            HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
-                            Console.WriteLine("标定时坐标保存完成");
-                        }
-                        else
-                        {//固定的相机保存标定时的轴坐标
-                            Console.WriteLine("开始保存标定时机械坐标..");
-                            string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
-                            string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
-                            HTuple mCalibAxisX = new HTuple(CalibAxisX);
-                            HTuple mCalibAxisY = new HTuple(CalibAxisY);
-                            Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
-                            HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
-                            HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
-                            Console.WriteLine("标定时坐标保存完成");
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("轴没有到位");
-                    Console.WriteLine("结束");
-                    HasStartCalib = false;
-                    return;
-                }
-            }
-            Console.WriteLine("结束");
-            HasStartCalib = false;
+        //                    HOperatorSet.VectorToHomMat2d(
+        //                            ((((((new HTuple(Px[0])).TupleConcat(Px[1])).TupleConcat(Px[2])).TupleConcat(Px[3])).TupleConcat(Px[4])).TupleConcat(Px[5])).TupleConcat(Px[6]).TupleConcat(Px[7]).TupleConcat(Px[8]),
+        //                            ((((((new HTuple(Py[0])).TupleConcat(Py[1])).TupleConcat(Py[2])).TupleConcat(Py[3])).TupleConcat(Py[4])).TupleConcat(Py[5])).TupleConcat(Py[6]).TupleConcat(Py[7]).TupleConcat(Py[8]),
+        //                            ((((((new HTuple(Qx[0] + bx)).TupleConcat(Qx[1] + bx)).TupleConcat(Qx[2] + bx)).TupleConcat(Qx[3] + bx)).TupleConcat(Qx[4] + bx)).TupleConcat(Qx[5] + bx)).TupleConcat(Qx[6] + bx).TupleConcat(Qx[7] + bx).TupleConcat(Qx[8] + bx),
+        //                            ((((((new HTuple(Qy[0] + by)).TupleConcat(Qy[1] + by)).TupleConcat(Qy[2] + by)).TupleConcat(Qy[3] + by)).TupleConcat(Qy[4] + by)).TupleConcat(Qy[5] + by)).TupleConcat(Qy[6] + by).TupleConcat(Qy[7] + by).TupleConcat(Qy[8] + by), out calibHomMat2D);
 
-            Task FinishPLC_Task = Task.Run(() =>
-            {
-                System.Threading.Thread.Sleep(1000);
-            });
-            await FinishPLC_Task;
-            if (_CameraName == "上相机")
-            {
-                try
-                {
-                    CameraManager.Camera_1_ReadImage(_ImageViewer, _CalibImagePath + "0");
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show("Camera_1_ReadImage:" + ex.Message);
-                }
-            }
-            else if (_CameraName == "下相机")
-            {
-                try
-                {
-                    CameraManager.Camera_2_ReadImage(_ImageViewer, _CalibImagePath + "0");
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show("Camera_2_ReadImage:" + ex.Message);
-                }
-            }
-        }
+
+        //                }
+        //                HOperatorSet.WriteTuple(calibHomMat2D, _CalibDataPath);
+
+        //                Console.WriteLine("相机标定成功!");
+        //                Console.WriteLine("相机标定成功!");
+        //                System.Windows.MessageBox.Show("相机标定成功!");
+        //                HasStartCalib = false;
+
+        //                if (_CalibMode == 9)
+        //                {
+        //                    Console.WriteLine("开始保存标定时机械坐标..");
+        //                    string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
+        //                    string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
+        //                    HTuple mCalibAxisX = new HTuple(CalibAxisX);
+        //                    HTuple mCalibAxisY = new HTuple(CalibAxisY);
+        //                    Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
+        //                    HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
+        //                    HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
+        //                    Console.WriteLine("标定时坐标保存完成");
+        //                }
+        //                else
+        //                {//固定的相机保存标定时的轴坐标
+        //                    Console.WriteLine("开始保存标定时机械坐标..");
+        //                    string mCalibAxisXPath = _CalibDataPath.Replace("Data.tup", "AxisX.tup");
+        //                    string mCalibAxisYPath = _CalibDataPath.Replace("Data.tup", "AxisY.tup");
+        //                    HTuple mCalibAxisX = new HTuple(CalibAxisX);
+        //                    HTuple mCalibAxisY = new HTuple(CalibAxisY);
+        //                    Console.WriteLine("标定时坐标:" + CalibAxisX + "," + CalibAxisY + "...");
+        //                    HOperatorSet.WriteTuple(mCalibAxisX, mCalibAxisXPath);
+        //                    HOperatorSet.WriteTuple(mCalibAxisY, mCalibAxisYPath);
+        //                    Console.WriteLine("标定时坐标保存完成");
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("轴没有到位");
+        //            Console.WriteLine("结束");
+        //            HasStartCalib = false;
+        //            return;
+        //        }
+        //    }
+        //    Console.WriteLine("结束");
+        //    HasStartCalib = false;
+
+        //    Task FinishPLC_Task = Task.Run(() =>
+        //    {
+        //        System.Threading.Thread.Sleep(1000);
+        //    });
+        //    await FinishPLC_Task;
+        //    if (_CameraName == "上相机")
+        //    {
+        //        try
+        //        {
+        //            CameraManager.Camera_1_ReadImage(_ImageViewer, _CalibImagePath + "0");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            System.Windows.MessageBox.Show("Camera_1_ReadImage:" + ex.Message);
+        //        }
+        //    }
+        //    else if (_CameraName == "下相机")
+        //    {
+        //        try
+        //        {
+        //            CameraManager.Camera_2_ReadImage(_ImageViewer, _CalibImagePath + "0");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            System.Windows.MessageBox.Show("Camera_2_ReadImage:" + ex.Message);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// 三点确定圆心
@@ -2713,6 +2740,6 @@ namespace HalconViewer
             return;
         }
 
-    */
+    
     }
 }

@@ -61,6 +61,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\MLib.csproj">
+      <Project>{0b37dc5b-4916-4d83-874e-35fb1f26fb7c}</Project>
+      <Name>MLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ViewROI\ViewROI.csproj">
       <Project>{c4f5c5de-7ea8-47fe-8218-48138f48965f}</Project>
       <Name>ViewROI</Name>
