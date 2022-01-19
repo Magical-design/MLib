@@ -21,7 +21,13 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel >
                     <Grid Height="30">
-                        <Button x:Name="BtOpenImage" Content="打开图像"  Width="60" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0" Click="BtOpenImage_Click"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="BtOpenImage" Content="打开图像"  Width="60" Height="24"  Click="BtOpenImage_Click"/>
                     </Grid>
                     <GroupBox Header="模板识别" Height="60">
                         <Grid>
@@ -37,17 +43,73 @@
                             <Button x:Name="BtCreateRegion" Content="识别区域"  Width="60" Height="24" Grid.Column="3" Click="BtCreateRegion_Click"  />
                         </Grid>
                     </GroupBox>
-                    <GroupBox Height="100"/>
+                    <GroupBox Header="⚪" Height="50">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="BtCreateCircle" Content="创建⚪"  Width="60" Height="24" Click="BtCreateCircle_Click"  />
+                            <Button x:Name="BtFindCircleCenter" Grid.Column="1"  Content="查找圆心"  Width="60" Height="24" Click="BtFindCircleCenter_Click"   />
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="——" Height="100">
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="BtCreateLine1" Content="直线1"  Width="60" Height="24" Click="BtCreateLine1_Click" />
+                            <Button x:Name="BtCreateLine2" Content="直线2"  Width="60" Height="24" Grid.Column="1" Click="BtCreateLine2_Click"/>
+                            <Button x:Name="BtCreateRegion1" Content="识别区域"  Width="60" Height="24" Grid.Column="2" Click="BtCreateRegion1_Click"/>
+                            <Button x:Name="BtFindCross" Content="查找交点"  Width="60" Height="24" Grid.Column="3" Click="BtFindCross_Click"/>
+                            <Button x:Name="BtTransImage" Content="变换图片"  Width="60" Height="24" Grid.Row="1" Grid.Column="4" Click="BtTransImage_Click"/>
+                            <StackPanel Grid.Row="1">
+                                <TextBlock Text="Row" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBox x:Name="TxRow"  Width="60" Height="24"  Text="{Binding mParameter.lineParameter.Row}" ToolTip="12"  />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1">
+                                <TextBlock Text="Column" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBox x:Name="TxColumn"  Width="60" Height="24" Text="{Binding mParameter.lineParameter.Column}"  />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="2">
+                                <TextBlock Text="Angle" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBox x:Name="TxAngle"  Width="60" Height="24" Text="{Binding mParameter.lineParameter.Angle}"  />
+                            </StackPanel>
+
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="灰度值"  Height="65">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="MinGray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBox x:Name="TxMinGray"  Width="60" Height="24"  Text="{Binding mParameter.grayParameter.MinGray}" TextChanged="TxMinGray_TextChanged" PreviewKeyDown="TxMinGray_PreviewKeyDown" LostFocus="TxMinGray_LostFocus"  />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="MaxGray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBox x:Name="TxMaxGray"  Width="60" Height="24"  Text="{Binding mParameter.grayParameter.MaxGray}"  />
+                            </StackPanel>
+                            <Button x:Name="BtCreateRegion_Gray" Content="识别区域"  Width="60" Height="24" Grid.Column="2" Click="BtCreateRegion_Gray_Click" />
+                            <Button x:Name="BtFindGray" Content="识别"  Width="60" Height="24"  Grid.Column="3" HorizontalAlignment="Left" Margin="6,7,0,7" Click="BtFindGray_Click" />
+                            
+                        </Grid>
+                    </GroupBox>
+
                 </StackPanel>
             </ScrollViewer>
         </Grid>
-
-
         <Log:LogS x:Name="mLogS" Grid.Row="1" Grid.ColumnSpan="2"/>
-
-
-
-
-
     </Grid>
 </Window>

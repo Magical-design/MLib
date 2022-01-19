@@ -2739,7 +2739,59 @@ namespace HalconViewer
 
             return;
         }
+        public static double[] FindModel(string _RegionPath, HObject _Image, ImageViewer _ImageViewer = null, int _MinGray = 210, int _MaxGray = 255, int _MinArea = 0, int _MaxArea = 99999)
+        {
+            if (_ImageViewer != null)
+            {
+                _ImageViewer.AppendHObject = null;
+                ROI mROI = ReadROI(_RegionPath);
+                if (mROI != null)
+                    _ImageViewer.ROIList.Add(mROI);
+                else
+                    _RegionPath = "";
+            }
+            double[] xy = new double[3];
+            try
+            {
+                HObject image;
+                if (string.IsNullOrEmpty(_RegionPath))
+                    image = _Image;
+                else
+                    HOperatorSet.ReduceDomain(_Image, ReadROI(_RegionPath).getRegion(), out image);
+                HObject mThresholdRegion;
+                HObject mConnectedRegions;
+                HObject mSelectedRegions;
+                HTuple Area, Row, Column;
+                HOperatorSet.Threshold(image, out mThresholdRegion, _MinGray, _MaxGray);
+                HOperatorSet.Connection(mThresholdRegion, out mConnectedRegions);
+                HOperatorSet.FillUp(mConnectedRegions, out mConnectedRegions);
+                //HOperatorSet.Connection(mThresholdRegion, out mConnectedRegions);
+                HOperatorSet.SelectShape(mConnectedRegions, out mSelectedRegions, "area", "and", _MinArea, _MaxArea);
+                HOperatorSet.ShapeTrans(mSelectedRegions, out mSelectedRegions, "rectangle2");//inner_rectangle1  找到的是不带角度的矩形，，，inner_rectangle2找到的是带角度的
+                HOperatorSet.AreaCenter(mSelectedRegions, out Area, out Row, out Column);
+                if (mSelectedRegions.CountObj() > 0 && Area.Length == 1)
+                {
+                    xy[0] = Row[0];
+                    xy[1] = Column[0];
+                    xy[2] = Area[0];
+                    if (_ImageViewer != null)
+                    {
+                        Tuple<string, object> t = new Tuple<string, object>("Colored", 12);
+                        Tuple<string, object> t1 = new Tuple<string, object>("DrawMode", "fill");
 
-    
+                        _ImageViewer.GCStyle = t;
+                        _ImageViewer.GCStyle = t1;
+
+                        _ImageViewer.AppendHObject = mSelectedRegions;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+            }
+            return xy;
+        }
+
     }
 }

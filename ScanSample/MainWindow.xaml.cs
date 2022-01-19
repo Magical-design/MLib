@@ -134,8 +134,6 @@ namespace ScanSample
             //刷新图像窗口
             try
             {
-                
-
                 mImageViewer.Repaint = !mImageViewer.Repaint;
                 
             }

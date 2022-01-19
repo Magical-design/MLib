@@ -23,7 +23,8 @@ namespace XmlSample
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
 
-        public string xmlPath = MFile.path4 + "person.xml";
+        public string xmlPath = MFile.path4;
+        public string xmlName = "person.xml";
         private Person mperson;
         public Person person
         {
@@ -50,13 +51,13 @@ namespace XmlSample
         {
             try
             {
-                person = (Person)xml.deserialize_from_xml(xmlPath, typeof(Person));
+                person = (Person)xml.deserialize_from_xml(xmlPath, xmlName, typeof(Person));
   
             }
             catch (Exception)
             {
                 person = new Person() { MName = "张三",Job="厨师",Sex="男", TF=true};
-                xml.serialize_to_xml(xmlPath, person);
+                xml.serialize_to_xml(xmlPath, xmlName, person);
             }
            
         }
@@ -64,7 +65,7 @@ namespace XmlSample
         {
             if (cmd == 0)
             {
-                person=(Person)xml.deserialize_from_xml(xmlPath, typeof(Person));
+                person=(Person)xml.deserialize_from_xml(xmlPath, xmlName, typeof(Person));
                 txName.Text = person.MName;
                 txJob.Text = person.Job;
                 txSex.Text = person.Sex;
@@ -79,7 +80,7 @@ namespace XmlSample
                 person.Sex = txSex.Text;
                 person.Tel = txTel.Text;
                 person.TF = Convert.ToBoolean(txTF.Text);
-                xml.serialize_to_xml(xmlPath, person);
+                xml.serialize_to_xml(xmlPath, xmlName, person);
 
             }
         }

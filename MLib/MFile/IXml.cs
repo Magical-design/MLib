@@ -15,21 +15,26 @@ namespace MLib
         /// </summary>
         /// <param name="path">the path to save the xml file</param>
         /// <param name="obj">the object you want to serialize</param>
-        public void serialize_to_xml(string path, object obj)
+        public async void serialize_to_xml(string path, string mFileName, object obj)
         {
-            XmlSerializer serializer = new XmlSerializer(obj.GetType());
-            string content = string.Empty;
-            //serialize
-            using (StringWriter writer = new StringWriter())
+            await MFile.CreateFileAsy(path, "");
+            await Task.Run(() =>
             {
-                serializer.Serialize(writer, obj);
-                content = writer.ToString();
-            }
-            //save to file
-            using (StreamWriter stream_writer = new StreamWriter(path))
-            {
-                stream_writer.Write(content);
-            }
+                XmlSerializer serializer = new XmlSerializer(obj.GetType());
+                string content = string.Empty;
+                //serialize
+                using (StringWriter writer = new StringWriter())
+                {
+                    serializer.Serialize(writer, obj);
+                    content = writer.ToString();
+                }
+                //save to file
+                using (StreamWriter stream_writer = new StreamWriter(path + mFileName))
+                {
+                    stream_writer.Write(content);
+                }
+            });
+
         }
 
         /// <summary>
@@ -37,10 +42,10 @@ namespace MLib
         /// </summary>
         /// <param name="path">the path of the xml file</param>
         /// <param name="object_type">the object type you want to deserialize</param>
-        public object deserialize_from_xml(string path, Type object_type)
+        public object deserialize_from_xml(string path, string mFileName, Type object_type)
         {
             XmlSerializer serializer = new XmlSerializer(object_type);
-            using (StreamReader reader = new StreamReader(path))
+            using (StreamReader reader = new StreamReader(path+ mFileName))
             {
                 return serializer.Deserialize(reader);
             }
