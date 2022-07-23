@@ -54,12 +54,12 @@ namespace VisionTest
             try
             {
                 
-                mParameter = (Parameter)xml.deserialize_from_xml(MFile.path4 + "Parameters.xml", typeof(Parameter));
+                mParameter = (Parameter)xml.deserialize_from_xml(MFile.path4 , "Parameters.xml", typeof(Parameter));
             }
             catch (Exception)
             {
                 mParameter = new Parameter() { lineParameter = new LineParameter() { Row=1.0 } };
-                xml.serialize_to_xml(MFile.path4 + "Parameters.xml", mParameter);
+                xml.serialize_to_xml(MFile.path4 , "Parameters.xml", mParameter);
             }
         }
         HObject hoimage;
@@ -288,7 +288,7 @@ namespace VisionTest
         private void BtTransImage_Click(object sender, RoutedEventArgs e)
         {
 
-            xml.serialize_to_xml(MFile.path4 + "Parameters.xml", mParameter);
+            xml.serialize_to_xml(MFile.path4 , "Parameters.xml", mParameter);
             HTuple hom;
             HObject ho_image;
             try
@@ -313,7 +313,7 @@ namespace VisionTest
 
         private void BtFindGray_Click(object sender, RoutedEventArgs e)
         {
-            xml.serialize_to_xml(MFile.path4 + "Parameters.xml", mParameter);
+            xml.serialize_to_xml(MFile.path4 , "Parameters.xml", mParameter);
             ImageViewerClear();
             try
             {

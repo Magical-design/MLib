@@ -10,6 +10,7 @@ namespace MLib
 {
     public class IXml
     {
+        public object lck=new object();
         /// <summary>
         /// serialize object to xml file.
         /// </summary>
@@ -17,22 +18,27 @@ namespace MLib
         /// <param name="obj">the object you want to serialize</param>
         public async void serialize_to_xml(string path, string mFileName, object obj)
         {
+            
             await MFile.CreateFileAsy(path, "");
             await Task.Run(() =>
             {
-                XmlSerializer serializer = new XmlSerializer(obj.GetType());
-                string content = string.Empty;
-                //serialize
-                using (StringWriter writer = new StringWriter())
+                lock (lck)
                 {
-                    serializer.Serialize(writer, obj);
-                    content = writer.ToString();
+                    XmlSerializer serializer = new XmlSerializer(obj.GetType());
+                    string content = string.Empty;
+                    //serialize
+                    using (StringWriter writer = new StringWriter())
+                    {
+                        serializer.Serialize(writer, obj);
+                        content = writer.ToString();
+                    }
+                    //save to file
+                    using (StreamWriter stream_writer = new StreamWriter(path + mFileName))
+                    {
+                        stream_writer.Write(content);
+                    }
                 }
-                //save to file
-                using (StreamWriter stream_writer = new StreamWriter(path + mFileName))
-                {
-                    stream_writer.Write(content);
-                }
+
             });
 
         }

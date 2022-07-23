@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace MLib
 
@@ -86,6 +87,23 @@ namespace MLib
                   return mPathR && mFileNameR;
               });
         }
+        static public void DeleteFile(string mPath, string mFileName)
+        {
+            string mFliePath = mPath + mFileName;
+            if (File.Exists(mFliePath) || mFileName == "")
+            {
+                try
+                {
+                    File.Delete(mFliePath);
+                }
+                catch (Exception ex)
+                { 
+                    Trace.WriteLine(ex);
+                }
+            }
+
+        }
+
         /// <summary>
         /// 创建文件夹/文件
         /// </summary>

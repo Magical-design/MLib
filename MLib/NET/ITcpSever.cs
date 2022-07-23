@@ -11,8 +11,8 @@ namespace MLib.NET
         public string ip = "127.0.0.1";
         public int port = 0;
 
-        public TcpClient tcpClient;
-        public TcpListener tcpListener;
+        private TcpClient tcpClient;
+        private TcpListener tcpListener;
         public event EventHandler<bool> ConnectStatusChange;
         public event EventHandler<bool> OpenStatusChanged;
         public event EventHandler<string> AutoReceiveContent;
@@ -107,7 +107,7 @@ namespace MLib.NET
             }
 
         }
-        public void CheckCnt()
+        private void CheckCnt()
         {
             if(Opened)
             {
@@ -152,7 +152,7 @@ namespace MLib.NET
             });
 
         }
-        public async void AutoReceive()
+        private async void AutoReceive()
         {
             await Task.Run(() =>
             {

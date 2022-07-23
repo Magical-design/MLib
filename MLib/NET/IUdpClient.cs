@@ -20,7 +20,7 @@ namespace MLib.NET
         public event EventHandler<string> AutoReceiveContent;
         private bool connect = false;
         private bool opened = false;
-        public UdpClient udpClient;
+        private UdpClient udpClient;
         public bool Opened
         {
             get
@@ -97,7 +97,7 @@ namespace MLib.NET
 
         IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-        public async void AutoReceive()
+        private async void AutoReceive()
         {
             await Task.Run(() =>
             {

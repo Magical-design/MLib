@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace MLib.NET
     {
         public string ip = "127.0.0.1";
         public int port = 0;
-        public TcpClient tcpClient;
+        private TcpClient tcpClient=null;
         public bool AutoConnect = false;
         public event EventHandler<bool> ConnectStatusChange;
         public event EventHandler<string> AutoReceiveContent;
@@ -18,8 +19,26 @@ namespace MLib.NET
         private bool connecting = false;
         private bool sendAndRecLock = false;
         private bool autoReceiving = false;
+        private bool close = false;
+        private bool autoReceivingEn = false;
+        private bool autoReceived = false;
+        private bool autoReceiveEn = false;
 
-        
+        public bool AutoReceiveEn
+        {
+            get
+            {
+                return autoReceiveEn;
+            }
+            set
+            {
+
+                autoReceiveEn = value;
+                if(autoReceiveEn)
+                    AutoReceive();
+
+            }
+        }
         public bool Connect
         {
             get
@@ -28,61 +47,63 @@ namespace MLib.NET
             }
             set
             {
-                if (connect != value && ConnectStatusChange!=null)
+                if (connect != value && value)
+                    ;
+                if (connect != value)
                 {
-                    if(!value)
-                    {
-                        try
-                        {
-                            tcpClient.Close();
-                            
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex);
-
-                        }
-                        tcpClient = new TcpClient();
-                    }
+                    if(ConnectStatusChange != null)
                     ConnectStatusChange(null, value);
                 }
-                    
-  
-            connect = value;
+                connect = value;
 
             }
         }
         public ITcpClient()
         {
             tcpClient = new TcpClient();
-            AutoReceive();
+            //AutoReceive();
         }
         public ITcpClient(string mip, int mport)
         {
             ip = mip;
             port = mport;
             tcpClient = new TcpClient(ip, port);
-            AutoReceive();
+            //AutoReceive();
         }
 
-        public object lck=new object();
-        public void CheckCnt()
+        private object lck=new object();
+        private int count = 0;
+        private void CheckCnt()
         {
             
             try
             {
 
-           // Dispatcher.CurrentDispatcher.Invoke(new Action(() => {
-                Connect = !((tcpClient.Client.Poll(1000, SelectMode.SelectRead) && (tcpClient.Client.Available == 0)) || !tcpClient.Client.Connected);
+                if (!tcpClient.Client.Connected)
+                    Trace.WriteLine("Connect=false");
+                // Dispatcher.CurrentDispatcher.Invoke(new Action(() => {    
+                bool c= !((tcpClient.Client.Poll(1000, SelectMode.SelectRead) && (tcpClient.Client.Available == 0)) || !tcpClient.Client.Connected);
+                if (c)
+                {
+                    count = 0;
+                    Connect = c;
+                }
+                else if(count<10)
+                    count++;
+                else
+                    Connect = c;
+                //Trace.WriteLine("1" + tcpClient.Client.Poll(1000, SelectMode.SelectRead));
+                //Trace.WriteLine("2" + (tcpClient.Client.Available == 0));
+                //Trace.WriteLine("3" + !tcpClient.Client.Connected);
+
            // }));
-
-
             }
             catch (Exception ex)
             {
                 Connect = false;
-                Console.WriteLine(ex);
-
+                Trace.WriteLine(ex);
+                tcpClient.Close();
+                tcpClient = new TcpClient();
             }
 
         }
@@ -100,7 +121,7 @@ namespace MLib.NET
                 catch (Exception ex)
                 {
 
-                    Console.WriteLine(ex);
+                    Trace.WriteLine(ex);
                 }
             }
 
@@ -120,7 +141,7 @@ namespace MLib.NET
         public async Task<string> SendAndRecAsy(string s)
         {
             sendAndRecLock = true;
-            await Task.Run(()=>{ while (autoReceiving) { Thread.Sleep(50); } ; });               
+            await Task.Run(()=>{ while (autoReceiving) { Thread.Sleep(20); } ; });               
             await SendAsy(s);
             string rs = await RecAsync();
             sendAndRecLock = false;
@@ -130,7 +151,7 @@ namespace MLib.NET
 
 
 
-        private async Task<string> RecAsync()
+        public async Task<string> RecAsync()
         {
             try
             {
@@ -155,23 +176,56 @@ namespace MLib.NET
             }
             catch (Exception ex)
             {
-
+                Trace.WriteLine(ex);
                 return ex.ToString();
             }
         }
-
-        public async void AutoReceive()
+        public string Rec()
         {
+            try
+            {
+
+                if (Connect)
+                {
+                    byte[] recData = new Byte[256];
+                    // String to store the response ASCII representation.
+                    String responseData = String.Empty;
+
+                    NetworkStream stream = tcpClient.GetStream();
+                    stream.ReadTimeout = 200;
+                    // Read the first batch of the TcpServer response bytes.
+                    Int32 bytes =  stream.Read(recData, 0, recData.Length);
+                    responseData = System.Text.Encoding.ASCII.GetString(recData, 0, bytes);
+                    return responseData;
+                }
+                else
+                    return "未连接";
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+                return ex.ToString();
+            }
+        }
+        private async void AutoReceive()
+        {
+            await Task.Run(() => { while (autoReceived || !close) Thread.Sleep(20); });
+            autoReceived = true;
             await Task.Run(() =>
             {
-                while (true)
+                while (AutoReceiveEn)
                 {
                     try
-
                     {
                         CheckCnt();
                         if (!sendAndRecLock && Connect)
                         {
+                            if(tcpClient.Available<=0)
+                            {
+                                Thread.Sleep(30);
+                                continue;
+                            }
                             autoReceiving = true;
                             byte[] recData = new Byte[256];
                             // String to store the response ASCII representation.
@@ -186,13 +240,12 @@ namespace MLib.NET
                             autoReceiving = false;
                             AutoReceiveContent?.Invoke(null, responseData);
                         }
-
                     }
                     catch (Exception ex)
                     {
                         autoReceiving = false;
                         Thread.Sleep(200);
-                        Console.WriteLine(ex);
+                        Trace.WriteLine(ex);
                     }
                     
 
@@ -200,10 +253,12 @@ namespace MLib.NET
 
 
             });
-
+            autoReceiving = false;
+            autoReceived = false;
         }
-        public async  Task _Connect()
+        public async  void _Connect()
         {
+            await Task.Run(() => { while (close) Thread.Sleep(20) ; });
             if (connecting)
                 return;
             else
@@ -213,9 +268,10 @@ namespace MLib.NET
 
                     do
                     {
-                        CheckCnt();
+                        CheckCnt(); 
                         if (!Connect)
                         {
+                            
                             try
                             {
                                 connecting = true;
@@ -225,41 +281,51 @@ namespace MLib.NET
                             catch (Exception ex)
                             {
                                 tcpClient.Close();
+                                
                                 tcpClient = new TcpClient();
-                                Console.WriteLine(ex);
+                                Trace.WriteLine(ex);
                             }
-
                         }
-                        if (!Connect)
+                        if(!Connect)
                             Thread.Sleep(1500);
                         else
                             Thread.Sleep(200);
-
-                    } while (AutoConnect);
+                    } while (AutoConnect && !close);
                     connecting = false;
-
-
                 });
-
             }
-
-
         }
 
         public void Close()
         {
-
             try
-            {
-                Connect = false;
-
-            }
-            catch (Exception ex)
             {
                 tcpClient.Close();
                 tcpClient = new TcpClient();
-                Console.WriteLine(ex);
             }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+            try
+            {
+                Connect = false;
+                close = true;
+                while (connecting) Thread.Sleep(50); 
+                //while (autoReceivingEn) Thread.Sleep(50); 
+                Connect = false;
+                close = false;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+        }
+        public async void CloseAsy()
+        {
+            await Task.Run(() =>{
+                Close();
+            });
         }
 
     }

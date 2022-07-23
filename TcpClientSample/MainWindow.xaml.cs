@@ -84,7 +84,7 @@ namespace TcpClientSample
                 {
                     iTcpClient.ip = txIP.Text;
                     iTcpClient.port = Int32.Parse(txPort.Text);
-                    await iTcpClient._Connect();
+                    iTcpClient._Connect();
 
                 }
                 else

@@ -71,7 +71,6 @@ namespace XmlSample
                 txSex.Text = person.Sex;
                 txTel.Text = person.Tel;
                 txTF.Text = person.TF.ToString();
-
             }
             else
             {
