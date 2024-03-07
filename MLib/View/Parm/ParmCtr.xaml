@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="MLib.View.Parm.ParmCtr"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MLib.View.Parm"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="100">
+    <UserControl.Resources>
+        <ToolTip x:Key="errorTooltip" DataContext="{Binding PlacementTarget, 
+           RelativeSource={RelativeSource Self}}"
+       Foreground="White" Background="red" Content="{Binding (Validation.Errors)[0].ErrorContent}">
+        </ToolTip>
+        <Style TargetType="TextBox" x:Key="txbInErrorTip">
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Validation.HasError" Value="true"  />
+                    </MultiTrigger.Conditions>
+                    <!--<Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorTemplateTip}">
+               </Setter>-->
+                    <Setter Property="ToolTip" Value="{StaticResource errorTooltip }">
+                    </Setter>
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="AUTO"/>
+            <RowDefinition Height="AUTO"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="gdTitle">
+        </Grid>
+        <UniformGrid x:Name="ugdContent1" Grid.Row="1" HorizontalAlignment="Stretch">
+        </UniformGrid>
+    </Grid>
+</UserControl>

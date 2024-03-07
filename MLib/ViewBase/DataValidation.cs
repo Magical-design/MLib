@@ -28,4 +28,14 @@ namespace MLib
             return ValidationResult.ValidResult;
         }
     }
+    public class NumerValidation : ValidationRule
+    {
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        {
+            int _out;
+            if (!int.TryParse(value.ToString(), out _out))
+                return new System.Windows.Controls.ValidationResult(false, "请输入数字!");
+            return ValidationResult.ValidResult;
+        }
+    }
 }

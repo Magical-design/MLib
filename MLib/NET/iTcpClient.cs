@@ -20,7 +20,7 @@ namespace MLib.NET
         private bool sendAndRecLock = false;
         private bool autoReceiving = false;
         private bool close = false;
-        private bool autoReceivingEn = false;
+        //private bool autoReceivingEn = false;
         private bool autoReceived = false;
         private bool autoReceiveEn = false;
 

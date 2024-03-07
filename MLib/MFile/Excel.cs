@@ -22,6 +22,10 @@ namespace MLib
         /// <returns>返回处理后的datatable</returns>
         public static DataTable WorksheetToTable(ExcelWorksheet worksheet)
         {
+            if (worksheet == null)
+            {
+                return new DataTable();
+            }
             //获取worksheet的行数
             int rows = worksheet.Dimension.End.Row;
             //获取worksheet的列数
@@ -51,7 +55,10 @@ namespace MLib
         {
             try
             {
-                return obj.ToString();
+                if (obj == null)
+                    return "";
+                else
+                    return obj.ToString();
             }
             catch (Exception ex)
             {

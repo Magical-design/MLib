@@ -1,5 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:MLib">
+    <local:CheckedConverter x:Key="CheckedConverter"/>
+    <local:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     <ControlTemplate x:Key="ErrorTemplate">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Right" Foreground="White"
@@ -47,11 +49,41 @@
                 </Setter>-->
                 <Setter Property="ToolTip" Value="{StaticResource errorTooltip }">
                 </Setter>
+                <Setter Property="BorderBrush" Value="Red"/>
+                <Setter Property="BorderThickness" Value="2"/>
             </MultiTrigger>
         </Style.Triggers>
     </Style>
-    
+    <Style TargetType="TabItem" x:Key="tabSelectedStyle">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border Name="Panel" BorderThickness="0.5" BorderBrush="Black" Background="WhiteSmoke" >
+                        <TextBlock HorizontalAlignment="Center"  VerticalAlignment="Center"  >
+                        <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="10,2"/>
+                        </TextBlock>
+                    </Border>
 
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Panel" Property="Background" Value="LightSkyBlue" />
+                        </Trigger>
+                        <!--<Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="Panel" Property="Background" Value="White" />
+                        </Trigger>-->
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+    <Style x:Key="dgCell" TargetType="TextBlock">
+        <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
 
 
 </ResourceDictionary>

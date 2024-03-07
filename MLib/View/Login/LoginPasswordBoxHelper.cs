@@ -110,6 +110,7 @@ namespace MLib.View.Login
             {
                 return;
             }
+            //SetPassword(pb, pb.Password);
             SetPasswordLength(pb, pb.Password.Length);
         }
     }

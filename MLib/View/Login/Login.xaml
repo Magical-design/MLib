@@ -32,7 +32,7 @@
                 <ColumnDefinition Width="13*"/>
             </Grid.ColumnDefinitions>
             <Label Content="密码："  HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="41" Height="25" Margin="15,0,0,0"/>
-            <PasswordBox x:Name="pswBox" vm:LoginPasswordBoxHelper.IsPasswordBindingEnable="True" vm:LoginPasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="请输入密码"  Grid.Column="1"  HorizontalAlignment="Center" Height="26" VerticalAlignment="Center" Width="90" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource  password}"  >
+            <PasswordBox x:Name="pswBox" vm:LoginPasswordBoxHelper.IsPasswordBindingEnable="True"   vm:LoginPasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="请输入密码"  Grid.Column="1"  HorizontalAlignment="Center" Height="26" VerticalAlignment="Center" Width="90" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Style="{StaticResource  password}"  >
                 <PasswordBox.InputBindings>
                     <KeyBinding Key="Enter" Command="{Binding btLoginClick}"/>
                 </PasswordBox.InputBindings>
