@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace MLib
 {
@@ -65,6 +66,22 @@ namespace MLib
         public void OnPropertyChanged(string propertyName)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        private void OnPropertyChanged1([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+            {
+                return false;
+            }
+
+            field = value;
+            OnPropertyChanged1(propertyName);
+            return true;
         }
 
 
@@ -155,24 +172,30 @@ namespace MLib
     public class DelegateCommand : ICommand
     {
         private Action action;
-        private Action<Object> actionT;
+        private Action<object> actionT;
+        private Predicate<object> _canExecute;
 
         public DelegateCommand(Action action)
         {
             this.action = action;
         }
 
-        public DelegateCommand(Action<Object> action)
-        {
-            this.actionT = action;
-        }
-
+        public DelegateCommand(Action<object> execute) : this(execute, null) { }
         public bool CanExecute(object parameter)
         {
-            return true;
+            //return true;
+            return _canExecute?.Invoke(parameter) ?? true;
         }
-
-        public event EventHandler CanExecuteChanged;
+        public DelegateCommand(Action<object> execute, Predicate<object> canExecute)
+        {
+            actionT = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
 
         public void Execute(object parameter)
         {
@@ -218,22 +241,25 @@ namespace MLib
 
         #endregion
     }
+    [ValueConversion(typeof(bool), typeof(bool))]
     public class CheckedConverter : IValueConverter
     {
-
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             return value.ToString() == parameter.ToString();
+            
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            bool isChecked = (bool)value;
+            //bool isChecked = (bool)value;
             //if (!isChecked)
             //{
             //    return null;
             //}
+
             return parameter.ToString();
+
         }
     }
     public class BindableRichTextBox : RichTextBox

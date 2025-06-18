@@ -9,7 +9,7 @@
     <UserControl.Resources>
         <ToolTip x:Key="errorTooltip" DataContext="{Binding PlacementTarget, 
            RelativeSource={RelativeSource Self}}"
-       Foreground="White" Background="red" Content="{Binding (Validation.Errors)[0].ErrorContent}">
+       Foreground="White" Background="Red" Content="{Binding (Validation.Errors)[0].ErrorContent}">
         </ToolTip>
         <Style TargetType="TextBox" x:Key="txbInErrorTip">
             <Style.Triggers>

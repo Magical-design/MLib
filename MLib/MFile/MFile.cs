@@ -40,52 +40,52 @@ namespace MLib
         static public async Task<bool> CreateFileAsy(string mPath, string mFileName)
         {
             bool mPathR = false, mFileNameR = false;
-            string mFliePath = mPath+ mFileName;
-             return  await Task.Run(() =>
-              {
-                  if (!Directory.Exists(mPath) && mPath != "")
-                  {                     
-                      try
-                      {
-                          Directory.CreateDirectory(mPath);
-                          while (!Directory.Exists(mPath))
-                          {
-                              Task.Delay(10);
-                              Console.WriteLine("正在创建" + mPath + "文件夹");
-                          }
-                          mPathR = true;
-                      }
-                      catch (Exception) { };
+            string mFliePath = mPath + mFileName;
+            return await Task.Run(() =>
+             {
+                 if (!Directory.Exists(mPath) && mPath != "")
+                 {
+                     try
+                     {
+                         Directory.CreateDirectory(mPath);
+                         while (!Directory.Exists(mPath))
+                         {
+                             Task.Delay(10);
+                             Console.WriteLine("正在创建" + mPath + "文件夹");
+                         }
+                         mPathR = true;
+                     }
+                     catch (Exception) { };
 
-                  }
-                  else
-                      mPathR = true;
+                 }
+                 else
+                     mPathR = true;
 
 
-                  if (File.Exists(mFliePath) || mFileName == "")
-                      mFileNameR= true;
-                  else
-                  {
-                      try
-                      {
-                        
-                          File.Create(mFliePath).Close();
-                          while (!File.Exists(mFliePath))
-                          {
-                              Task.Delay(10);
-                              Console.WriteLine("正在创建" +  mFliePath + "文件");
-                          }
+                 if (File.Exists(mFliePath) || mFileName == "")
+                     mFileNameR = true;
+                 else
+                 {
+                     try
+                     {
 
-                          mFileNameR =true;
-                      }
-                      catch (Exception e)
-                      {
-                          Console.WriteLine(e);
-                          mFileNameR= false;
-                      }
-                  }
-                  return mPathR && mFileNameR;
-              });
+                         File.Create(mFliePath).Close();
+                         while (!File.Exists(mFliePath))
+                         {
+                             Task.Delay(10);
+                             Console.WriteLine("正在创建" + mFliePath + "文件");
+                         }
+
+                         mFileNameR = true;
+                     }
+                     catch (Exception e)
+                     {
+                         Console.WriteLine(e);
+                         mFileNameR = false;
+                     }
+                 }
+                 return mPathR && mFileNameR;
+             });
         }
         static public void DeleteFile(string mPath, string mFileName)
         {
@@ -97,7 +97,7 @@ namespace MLib
                     File.Delete(mFliePath);
                 }
                 catch (Exception ex)
-                { 
+                {
                     Trace.WriteLine(ex);
                 }
             }
@@ -114,48 +114,48 @@ namespace MLib
         {
             bool mPathR = false, mFileNameR = false;
             string mFliePath = mPath + mFileName;
-                if (!Directory.Exists(mPath) && mPath != "")
+            if (!Directory.Exists(mPath) && mPath != "")
+            {
+                try
                 {
-                    try
+                    Directory.CreateDirectory(mPath);
+                    while (!Directory.Exists(mPath))
                     {
-                        Directory.CreateDirectory(mPath);
-                        while (!Directory.Exists(mPath))
-                        {
-                            Task.Delay(10);
-                            Console.WriteLine("正在创建" + mPath + "文件夹");
-                        }
-                        mPathR = true;
+                        Task.Delay(10);
+                        Console.WriteLine("正在创建" + mPath + "文件夹");
                     }
-                    catch (Exception) { };
-
-                }
-                else
                     mPathR = true;
-
-
-                if (File.Exists(mFliePath) || mFileName == "")
-                    mFileNameR = true;
-                else
-                {
-                    try
-                    {
-
-                        File.Create(mFliePath).Close();
-                        while (!File.Exists(mFliePath))
-                        {
-                            Task.Delay(10);
-                            Console.WriteLine("正在创建" + mFliePath + "文件");
-                        }
-
-                        mFileNameR = true;
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        mFileNameR = false;
-                    }
                 }
-                return mPathR && mFileNameR;
+                catch (Exception) { };
+
+            }
+            else
+                mPathR = true;
+
+
+            if (File.Exists(mFliePath) || mFileName == "")
+                mFileNameR = true;
+            else
+            {
+                try
+                {
+
+                    File.Create(mFliePath).Close();
+                    while (!File.Exists(mFliePath))
+                    {
+                        Task.Delay(10);
+                        Console.WriteLine("正在创建" + mFliePath + "文件");
+                    }
+
+                    mFileNameR = true;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    mFileNameR = false;
+                }
+            }
+            return mPathR && mFileNameR;
         }
         public static void CopyFileOnly(string souce, string target)
         {
@@ -166,9 +166,8 @@ namespace MLib
             {
                 System.IO.Directory.CreateDirectory(destDirectoryFullName);
             }
-
             file.CopyTo(target, true);
-            
+
         }
 
         public static void MoveFileOnly(string souce, string target)
@@ -182,7 +181,7 @@ namespace MLib
             }
             file.MoveTo(target + file.Name);
         }
-        public static void MoveFileOnly(string souce, string target,string newName)
+        public static void MoveFileOnly(string souce, string target, string newName)
         {
             System.IO.FileInfo file = new FileInfo(souce);
 

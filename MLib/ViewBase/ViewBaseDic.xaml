@@ -79,7 +79,32 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+    <Style TargetType="TabItem" x:Key="tabSelectedStyle1">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border Name="Panel" BorderThickness="0.5" BorderBrush="Black" Background="WhiteSmoke" >
+                        <TextBlock HorizontalAlignment="Center"  VerticalAlignment="Center"  >
+                        <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        ContentSource="Header"
+                                        Margin="2,2"/>
+                        </TextBlock>
+                    </Border>
 
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Panel" Property="Background" Value="LightSkyBlue" />
+                        </Trigger>
+                        <!--<Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="Panel" Property="Background" Value="White" />
+                        </Trigger>-->
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style x:Key="dgCell" TargetType="TextBlock">
         <Setter Property="TextAlignment" Value="Center"/>

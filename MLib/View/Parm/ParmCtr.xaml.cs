@@ -49,6 +49,13 @@ namespace MLib.View.Parm
         public string CurText2 = "";
         public bool lck1 = false;
         public bool lck2 = false;
+        public string ConfirmWD="0";
+        public string VisibilityCondition = "";
+        public string VisibilityConditionAdd = "";
+        public string VisibilityConditionVal = "";
+        public string IsReadOnlyCondition = "";
+        public string IsReadOnlyConditionAdd = "";
+        public string IsReadOnlyConditionVal = "";
         public string Add1
         { 
             get { return add1; } 
@@ -107,7 +114,7 @@ namespace MLib.View.Parm
             if (val)
                 btM.Background = Brushes.Green;
             else
-                btM.Background = Brushes.Red;
+                btM.Background = Brushes.Snow;
 
            if (val && MONTitle != "")
                 btM.Content = MONTitle ;

@@ -26,6 +26,7 @@ namespace MLib
             {
                 return new DataTable();
             }
+            TrimLastEmptyRows(worksheet);
             //获取worksheet的行数
             int rows = worksheet.Dimension.End.Row;
             //获取worksheet的列数
@@ -50,7 +51,24 @@ namespace MLib
             }
             return dt;
         }
+        public static void TrimLastEmptyRows(ExcelWorksheet worksheet)
+        {
+            while (IsLastRowEmpty(worksheet))
+                worksheet.DeleteRow(worksheet.Dimension.End.Row);
+        }
 
+        public static bool IsLastRowEmpty(ExcelWorksheet worksheet)
+        {
+            var empties = new List<bool>();
+
+            for (int i = 1; i <= worksheet.Dimension.End.Column; i++)
+            {
+                var rowEmpty = worksheet.Cells[worksheet.Dimension.End.Row, i].Value == null ? true : false;
+                empties.Add(rowEmpty);
+            }
+
+            return empties.All(e => e);
+        }
         private static string GetString(object obj)
         {
             try
